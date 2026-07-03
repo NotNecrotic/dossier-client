@@ -1,6 +1,14 @@
+using Dossier.Engine.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<SettingsService>();
+
+builder.Services.AddControllers();
+
 var app = builder.Build();
+
+app.MapControllers();
 
 app.MapGet("/status", () =>
 {
