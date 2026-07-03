@@ -9,6 +9,7 @@ public enum JobState
     Preprocessed,
     AwaitingUpload,
     Uploading,
+    Uploaded,
     Completed,
     Failed
 }
