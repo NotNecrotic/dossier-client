@@ -1,27 +1,17 @@
 using Microsoft.UI.Xaml;
+using Dossier.Client.Core.State;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
-namespace Dossier_App;
-
-/// <summary>
-/// The application window. This hosts a Frame that displays pages. Add your
-/// UI and logic to MainPage.xaml / MainPage.xaml.cs instead of here so you
-/// can use Page features such as navigation events and the Loaded lifecycle.
-/// </summary>
-public sealed partial class MainWindow : Window
+namespace Dossier.App
 {
-    public MainWindow()
+    public sealed partial class MainWindow : Window
     {
-        InitializeComponent();
+        public AppHost ViewModel { get; private set; }
 
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(AppTitleBar);
+        public MainWindow()
+        {
+            this.InitializeComponent();
 
-        AppWindow.SetIcon("Assets/AppIcon.ico");
-
-        // Navigate the root frame to the main page on startup.
-        RootFrame.Navigate(typeof(MainPage));
+            ViewModel = new AppHost();
+        }
     }
 }
