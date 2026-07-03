@@ -1,4 +1,5 @@
 namespace Dossier.Core.Jobs;
+using Dossier.Core.Enums;
 
 public class ProcessingJob
 {
