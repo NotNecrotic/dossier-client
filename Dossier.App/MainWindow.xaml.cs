@@ -1,17 +1,20 @@
 using Microsoft.UI.Xaml;
+using Dossier.App.ViewModels;
 using Dossier.Client.Core.State;
 
 namespace Dossier.App
 {
     public sealed partial class MainWindow : Window
     {
-        public AppHost ViewModel { get; private set; }
+        public MainViewModel ViewModel { get; }
 
         public MainWindow()
         {
             this.InitializeComponent();
 
-            ViewModel = new AppHost();
+            var state = new AppState();
+
+            ViewModel = new MainViewModel(state);
         }
     }
 }
