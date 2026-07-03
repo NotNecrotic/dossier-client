@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dossier - AI Video Indexer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- STAGE 1: THE DOSSIER SEARCH SCREEN -->
+    <div id="introContainer" class="intro-container">
+        <div class="hero-center-group">
+            <h1 class="brand-title">THE DOSSIER</h1>
+            <p class="brand-subtitle">Find any moment from any video in seconds.</p>
+
+            <!-- Overhauled Chat Box Frame with Animated Border Core -->
+            <div class="glow-input-wrapper">
+                <div class="border-glow-layer"></div>
+                <form id="introForm" class="interactive-search-box">
+                    <textarea 
+                        id="introInput" 
+                        placeholder="Describe the scene, conversation, or moment..." 
+                        rows="1"
+                    ></textarea>
+                    
+                    <!-- Action button shifted directly into the input track alignment row -->
+                    <button type="submit" id="introSubmitBtn" class="action-submit-btn" title="Analyze Target">
+                        <span class="default-icon">⚡</span>
+                        <span class="thinking-loader-dots">
+                            <span></span><span></span><span></span>
+                        </span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Target drop-zone for thinking status layout injections -->
+            <div id="menuChatStatusContainer"></div>
+
+            <!-- Clean, detached utility dock for secondary actions -->
+            <div class="utility-dock">
+                <button id="manualExploreBtn" class="utility-btn" title="Explore Workspace">
+                    <span class="btn-icon">📁</span> Explore Workspace
+                </button>
+                <button id="triggerSettingsBtn" class="utility-btn icon-only" title="Settings">
+                    <span class="btn-icon">⚙️</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAGE 2: MAIN WORKING CONSOLE MATRIX -->
+    <div class="app-container" id="appContainer">
+        <!-- 1. Side File Explorer -->
+        <div class="sidebar">
+            <div class="panel-header">
+                <span>WORKSPACE METRICS</span>
+                <div class="sidebar-nav-actions">
+                    <button id="backBtn" class="btn-back">⌃ BACK</button>
+                    <button class="dashboard-exit-btn" id="exitDashboardBtn">⌥ EXIT</button>
+                </div>
+            </div>
+            <div class="path-banner" id="currentPathDisplay">/root</div>
+            <div class="file-list" id="fileListContainer">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+
+        <!-- 2. Primary Video Player Matrix -->
+        <div class="main-content">
+            <div class="player-wrapper" style="position: relative; width: 100%;">
+                <div class="no-video-placeholder" id="videoPlaceholder">
+                    Select a target sequence or video clip from the panel to begin execution.
+                </div>
+                
+                <!-- ONLY ONE VIDEO PLAYER ELEMENT -->
+                <video id="mainVideoPlayer" controls style="width: 100%; display: none;"></video>
+                
+                <!-- SUBTITLE OVERLAY INSIDE THE SAME BOUNDING BOX -->
+                <div id="subtitleOverlay" class="subtitle-overlay"></div>
+            </div>
+            
+            <!-- Optional: Cleaned up title banner area if needed -->
+            <div class="video-title-overlay" id="videoTitleDisplay" style="padding: 10px; font-weight: bold;">
+                <!-- Title string text injected here by JS -->
+            </div>
+        </div>
+
+        <!-- 3. AI Copilot Side Panel -->
+        <div class="chat-panel">
+            <div class="panel-header">DOSSIER COORDINATOR</div>
+            <div class="chat-history" id="chatHistory">
+                <!-- Injected via transition or query responses -->
+            </div>
+            <div class="chat-input-wrapper">
+                <form class="chat-form" id="panelChatForm">
+                    <input type="text" id="panelChatInput" class="chat-input" placeholder="Ask coordinator to locate logs..." autocomplete="off">
+                    <button type="submit" class="chat-submit">SEND</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL SETTINGS MODAL LAYER -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-card">
+            <h3>⚙️ System Configurations</h3>
+            <div class="settings-group">
+                <label>Storage Index Directory</label>
+                <input type="text" id="storagePathInput" placeholder="C:\Dossier\Clips" value="C:\Dossier\Clips">
+            </div>
+            <div class="settings-group">
+                <label>Discord Bot Sync Hook Token</label>
+                <input type="password" id="hookTokenInput" placeholder="MTA5... hidden identifier token">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-close-modal" id="closeSettingsBtn">Cancel</button>
+                <button type="button" class="btn-save-modal" id="saveSettingsBtn">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+        // State Engine
+        let currentDirectoryPath = "";
+        let currentlyPlayingUrl = "";
+        let currentSubtitles = []; // Track active clip subtitles
+
+        // Component Elements Map
+        const introContainer = document.getElementById('introContainer');
+        const appContainer = document.getElementById('appContainer');
+        const introForm = document.getElementById('introForm');
+        const introInput = document.getElementById('introInput');
+        const manualExploreBtn = document.getElementById('manualExploreBtn');
+        const exitDashboardBtn = document.getElementById('exitDashboardBtn');
+        
+        const triggerSettingsBtn = document.getElementById('triggerSettingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        const fileListContainer = document.getElementById('fileListContainer');
+        const currentPathDisplay = document.getElementById('currentPathDisplay');
+        const backBtn = document.getElementById('backBtn');
+        const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+        const subtitleOverlay = document.getElementById('subtitleOverlay'); // Hooked up overlay
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const videoTitleDisplay = document.getElementById('videoTitleDisplay');
+        const panelChatForm = document.getElementById('panelChatForm');
+        const panelChatInput = document.getElementById('panelChatInput');
+        const chatHistory = document.getElementById('chatHistory');
+
+        // Textarea processing
+        introInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                introForm.requestSubmit();
+            }
+        });
+
+        // Navigation Controllers
+        function switchToDashboard() {
+            introContainer.classList.add('collapsed');
+            appContainer.classList.add('active');
+        }
+
+        function switchToHomeSearch() {
+            appContainer.classList.remove('active');
+            introContainer.classList.remove('collapsed');
+        }
+
+        // Action Bindings
+        manualExploreBtn.addEventListener('click', () => {
+            switchToDashboard();
+            if (chatHistory.children.length === 0) {
+                appendChatMessage("Workspace accessed manually via root terminal routing.", 'ai');
+            }
+            loadDirectory("");
+        });
+
+        exitDashboardBtn.addEventListener('click', () => {
+            mainVideoPlayer.pause();
+            switchToHomeSearch();
+        });
+
+        // Settings Modal Controls
+        triggerSettingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+        saveSettingsBtn.addEventListener('click', () => {
+            settingsModal.classList.remove('open');
+        });
+
+        // --- Loader / Thinking Animation Hook Configuration ---
+        function setChatLoadingState(isLoading, formType = "intro") {
+            const inputField = formType === "intro" ? introInput : panelChatInput;
+            const targetForm = formType === "intro" ? introForm : panelChatForm;
+            const submitBtn = formType === "intro" ? document.getElementById('introSubmitBtn') : null;
+            
+            if (isLoading) {
+                inputField.disabled = true;
+                targetForm.classList.add('ai-thinking');
+                if (submitBtn) submitBtn.disabled = true;
+                
+                if (formType === "intro") {
+                    const statusBox = document.getElementById('menuChatStatusContainer');
+                    statusBox.innerHTML = `<div class="menu-status-notice">Parsing localized semantic embeddings...</div>`;
+                } else {
+                    appendChatMessage("AI is looking through archives...", 'system-loading');
+                }
+            } else {
+                inputField.disabled = false;
+                targetForm.classList.remove('ai-thinking');
+                if (submitBtn) submitBtn.disabled = false;
+                
+                if (formType === "intro") {
+                    const statusBox = document.getElementById('menuChatStatusContainer');
+                    statusBox.innerHTML = "";
+                } else {
+                    const loaders = chatHistory.querySelectorAll('.chat-message.system-loading');
+                    loaders.forEach(el => el.remove());
+                }
+            }
+        }
+
+        // --- Intro Form Submission Logic ---
+        introForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rawPrompt = introInput.value.trim();
+            if (!rawPrompt) return;
+
+            setChatLoadingState(true, "intro");
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: rawPrompt })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Server error payload:", errorText);
+                    throw new Error(`Network configuration breakdown: ${response.status} - ${errorText}`);
+                }
+                const data = await response.json();
+
+                setChatLoadingState(false, "intro");
+                
+                appendChatMessage(rawPrompt, 'user');
+                appendChatMessage(data.textResponse, 'ai');
+
+                if (data.actionRequired && data.mediaPayload) {
+                    const payload = data.mediaPayload;
+                    
+                    switchToDashboard();
+                    loadDirectory(""); 
+                    
+                    appendChatMessage(`🎬 Action Sync: Jumping to ${payload.jumpToSeconds}s (${payload.sceneReason})`, 'system-alert');
+                    
+                    // FIX: Reconstruct a clean mock object providing explicit subtitle targets
+                    const cleanFileName = payload.fileName || payload.videoFileUrl.split('/').pop();
+                    const mockItem = {
+                        path: payload.filePath || payload.videoFileUrl.replace('/api/video/', ''),
+                        name: cleanFileName,
+                        metadata: payload.metadata || {
+                            has_subtitles: true,
+                            subtitle_path: `/api/subtitles/${cleanFileName.replace(/\.[^/.]+$/, '')}.txt`
+                        }
+                    };
+                    playTargetVideo(payload.videoFileUrl, mockItem, payload.jumpToSeconds);
+                    introInput.value = ''; 
+                } else {
+                    switchToDashboard();
+                    loadDirectory("");
+                    appendChatMessage("Notice: Could not automate clip timeline location. Dropping to manual explorer.", 'system-alert');
+                    introInput.value = '';
+                }
+            } catch (err) {
+                console.error(err);
+                setChatLoadingState(false, "intro");
+                const statusBox = document.getElementById('menuChatStatusContainer');
+                statusBox.innerHTML = `<div class="menu-status-notice" style="color: #ff4a4a;">Error compiling network thread context flags.</div>`;
+            }
+        });
+
+
+        // --- Live Side Panel Chat Processing ---
+        panelChatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageText = panelChatInput.value.trim();
+            if (!messageText) return;
+
+            appendChatMessage(messageText, 'user');
+            panelChatInput.value = '';
+            
+            setChatLoadingState(true, "panel");
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: messageText })
+                });
+
+                if (!response.ok) throw new Error("Network configuration breakdown.");
+                const data = await response.json();
+
+                setChatLoadingState(false, "panel");
+                appendChatMessage(data.textResponse, 'ai');
+
+                if (data.actionRequired && data.mediaPayload) {
+                    const payload = data.mediaPayload;
+                    appendChatMessage(`🎬 Action Sync: Jumping to ${payload.jumpToSeconds}s (${payload.sceneReason})`, 'system-alert');
+                    
+                    // FIX: Match intro logic layout structure to maintain subtitles parsing hooks
+                    const cleanFileName = payload.fileName || payload.videoFileUrl.split('/').pop();
+                    const mockItem = {
+                        path: payload.filePath || payload.videoFileUrl.replace('/api/video/', ''),
+                        name: cleanFileName,
+                        metadata: payload.metadata || {
+                            has_subtitles: true,
+                            subtitle_path: `/api/subtitles/${cleanFileName.replace(/\.[^/.]+$/, '')}.txt`
+                        }
+                    };
+                    playTargetVideo(payload.videoFileUrl, mockItem, payload.jumpToSeconds);
+                }
+            } catch (err) {
+                console.error(err);
+                setChatLoadingState(false, "panel");
+                appendChatMessage("System mapping error occurred while parsing context flags.", 'ai');
+            }
+        });
+
+
+        // --- File System Operations ---
+        async function loadDirectory(path = "") {
+            const url = path ? `/api/files?path=${encodeURIComponent(path)}` : '/api/files';
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to scan directory layout.");
+                
+                const data = await response.json();
+                currentDirectoryPath = data.currentPath;
+                
+                currentPathDisplay.textContent = `/${currentDirectoryPath || 'root'}`;
+                backBtn.style.display = currentDirectoryPath ? "block" : "none";
+                
+                renderFileSystemItems(data.items);
+            } catch (err) {
+                console.error("Layout load failure:", err);
+                fileListContainer.innerHTML = `<div class="no-video-placeholder" style="color: var(--accent-pink)">Error loading workspace content.</div>`;
+            }
+        }
+
+        function renderFileSystemItems(items) {
+            fileListContainer.innerHTML = "";
+            if (items.length === 0) {
+                fileListContainer.innerHTML = `<div class="no-video-placeholder">Empty Directory</div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const isVideo = item.type === 'video';
+                // Check if metadata exists and has_subtitles is true
+                const hasSubs = isVideo && item.metadata && item.metadata.has_subtitles;
+                
+                let itemClasses = `file-item ${item.type}`;
+                
+                const row = document.createElement('div');
+                row.className = itemClasses;
+                
+                const itemApiUrl = `/api/video/${item.path}`;
+                if (isVideo && currentlyPlayingUrl === itemApiUrl) {
+                    row.classList.add('active');
+                }
+
+                const icon = item.type === 'directory' ? '📁' : '🎞️';
+                // Badge shows "Subtitles" if available, or "No Metadata" if it wasn't indexed
+                const badge = isVideo ? (item.metadata?.has_metadata ? '' : `<span class="unscanned-badge">No Metadata</span>`) : '';
+                const meta = isVideo ? `<span class="file-meta">${item.size_mb} MB</span>` : '';
+                
+                row.innerHTML = `
+                    <span class="file-icon">${icon}</span>
+                    <span class="file-name">${item.name}${badge}</span>
+                    ${meta}
+                `;
+
+                row.addEventListener('click', () => {
+                    if (item.type === 'directory') {
+                        loadDirectory(item.path);
+                    } else if (isVideo) {
+                        playTargetVideo(itemApiUrl, item);
+                        document.querySelectorAll('.file-item.video').forEach(el => el.classList.remove('active'));
+                        row.classList.add('active');
+                    }
+                });
+
+                fileListContainer.appendChild(row);
+            });
+        }
+
+        // --- Playback Pipeline and Subtitle Parsing ---
+        function playTargetVideo(url, item, jumpToSeconds = null) {
+            // Clean up any square brackets wrapping the incoming URL string
+            let cleanUrl = url.replace(/\[|\]/g, '');
+            currentlyPlayingUrl = cleanUrl;
+            videoPlaceholder.style.display = 'none';
+            mainVideoPlayer.style.display = 'block';
+            
+            let cleanItemName = item.name.replace(/\[|\]/g, '');
+            videoTitleDisplay.textContent = cleanItemName;
+
+            // 1. Wipe old tracks
+            const oldTracks = mainVideoPlayer.querySelectorAll('track');
+            oldTracks.forEach(track => track.remove());
+
+            // 2. Attach native HTML5 track using the new key
+            if (item.metadata && item.metadata.has_subtitles && item.metadata.subtitle_path) {
+                const track = document.createElement('track');
+                track.kind = 'captions';
+                track.label = 'English';
+                track.srclang = 'en';
+                
+                // Ensure the path is routed through your API
+                // Assuming your backend expects /api/subtitles/filename.txt
+                track.src = item.metadata.subtitle_path; 
+                track.default = true;
+                
+                mainVideoPlayer.appendChild(track);
+            }
+
+            // 3. Set video source
+            if (mainVideoPlayer.getAttribute('src') !== cleanUrl) {
+                mainVideoPlayer.src = cleanUrl;
+                mainVideoPlayer.load();
+            }
+
+            if (jumpToSeconds !== null) {
+                mainVideoPlayer.onloadedmetadata = function() {
+                    mainVideoPlayer.currentTime = jumpToSeconds;
+                    mainVideoPlayer.play().catch(err => console.log("Playback engine delay:", err));
+                    mainVideoPlayer.onloadedmetadata = null;
+                };
+                if (mainVideoPlayer.readyState >= 1) {
+                    mainVideoPlayer.currentTime = jumpToSeconds;
+                    mainVideoPlayer.play().catch(err => console.log("Playback engine delay:", err));
+                }
+            } else {
+                mainVideoPlayer.play().catch(err => console.log("Playback engine delay:", err));
+            }
+        }
+
+        // --- TimeUpdate Sync Engine ---
+        mainVideoPlayer.addEventListener('timeupdate', () => {
+            if (!currentSubtitles.length || !subtitleOverlay) return;
+            
+            const currentTime = mainVideoPlayer.currentTime;
+            const activeSub = currentSubtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+            
+            if (activeSub) {
+                subtitleOverlay.textContent = activeSub.text;
+                subtitleOverlay.style.display = 'block';
+            } else {
+                subtitleOverlay.textContent = '';
+                subtitleOverlay.style.display = 'none';
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (!currentDirectoryPath) return;
+            const segments = currentDirectoryPath.split('/');
+            segments.pop();
+            loadDirectory(segments.join('/'));
+        });
+
+        function appendChatMessage(text, sender) {
+            const container = document.createElement('div');
+            container.className = `chat-message ${sender}`;
+            container.textContent = text;
+            chatHistory.appendChild(container);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+</script>
+</body>
+</html>
