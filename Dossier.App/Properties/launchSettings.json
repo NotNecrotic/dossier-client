@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Dossier.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Dossier.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
