@@ -8,6 +8,8 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+var url = app.Urls.FirstOrDefault();
+
 app.MapControllers();
 
 app.MapGet("/status", () =>
@@ -19,4 +21,4 @@ app.MapGet("/status", () =>
     });
 });
 
-app.Run("http://127.0.0.1:5127");
+app.Run(url);

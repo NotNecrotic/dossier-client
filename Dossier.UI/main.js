@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron");
+const config = require("./config");
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -12,7 +13,7 @@ function createWindow() {
     win.loadFile("index.html");
 }
 
-fetch("http://127.0.0.1:5127/status")
+fetch(`${config.apiBase}/status`)
   .then(r => r.json())
   .then(console.log);
 
