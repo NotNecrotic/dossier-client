@@ -24,7 +24,7 @@ function openSettingsMenu() {
 
     const closeBtn = document.getElementById("closeSettingsBtn");
     const saveBtn = document.getElementById("saveSettingsBtn");
-    
+
     document.getElementById("serverTestResult").textContent = "";
 
     loadSettings();
@@ -156,3 +156,64 @@ async function testServerConnection() {
         }
     }
 }
+
+// ===== ONBOARDING STATE MANAGEMENT =====
+let currentStep = 1;
+const totalSteps = 4;
+
+function initOnboarding() {
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+
+    nextBtn.onclick = () => {
+        if (currentStep < totalSteps) {
+            showStep(currentStep + 1);
+        } else {
+            completeOnboarding();
+        }
+    };
+
+    prevBtn.onclick = () => {
+        if (currentStep > 1) showStep(currentStep - 1);
+    };
+}
+
+function showStep(stepIndex) {
+    document.querySelectorAll(".onboarding-step").forEach(s => s.classList.remove("active"));
+    document.getElementById(`step${stepIndex}`).classList.add("active");
+    
+    currentStep = stepIndex;
+    
+    // Update button states
+    document.getElementById("prevBtn").disabled = (currentStep === 1);
+    document.getElementById("nextBtn").textContent = (currentStep === totalSteps) ? "Finish" : "Next";
+}
+
+async function completeOnboarding() {
+    // Collect all data from onboarding inputs
+    const onboardingSettings = {
+        watchFolder: document.getElementById("obWatchFolder").value,
+        serverUrl: document.getElementById("obServerUrl").value,
+        serverKey: document.getElementById("obServerKey").value,
+        theme: document.getElementById("obTheme").value,
+        // Set defaults for remaining required fields
+        uploadLimitMbps: 0,
+        cpuLimitPercent: 50,
+        frameSamplingInterval: 5,
+        startOnBoot: false,
+        startMinimized: false
+    };
+
+    // Push to your backend API
+    await updateSettings(onboardingSettings);
+
+    // Hide onboarding and reveal search screen
+    document.getElementById("onboardingOverlay").style.display = "none";
+    document.getElementById("introContainer").style.display = "flex";
+}
+
+// Ensure you call initOnboarding on load
+document.addEventListener("DOMContentLoaded", () => {
+    wireUI();
+    initOnboarding();
+});

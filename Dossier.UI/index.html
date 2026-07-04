@@ -8,9 +8,48 @@
 </head>
 <script type="module" src="./app.js"></script>
 <body>
+    <!-- STAGE 0: ONBOARDING -->
+    <div id="onboardingOverlay" class="onboarding-overlay">
+        <div class="onboarding-card" id="onboardingCard">
+            
+            <div class="onboarding-step active" id="step1">
+                <h2>Welcome to The Dossier</h2>
+                <p>Let's configure your environment to start indexing and searching your media library.</p>
+            </div>
+
+            <div class="onboarding-step" id="step2">
+                <h2>Source Directory</h2>
+                <p>Select the folder where your video assets are stored.</p>
+                <input type="text" id="obWatchFolder" placeholder="Path to video folder...">
+                <button onclick="browseFolder()">Browse</button>
+            </div>
+
+            <div class="onboarding-step" id="step3">
+                <h2>Server Configuration</h2>
+                <p>Enter your Dossier server details to enable AI processing.</p>
+                <input type="text" id="obServerUrl" placeholder="Server URL (e.g., http://127.0.0.1:5187)">
+                <input type="password" id="obServerKey" placeholder="Server Secret Key">
+            </div>
+
+            <div class="onboarding-step" id="step4">
+                <h2>Appearance</h2>
+                <p>Choose your preferred interface theme.</p>
+                <select id="obTheme">
+                    <option value="system">System Default</option>
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                </select>
+            </div>
+
+            <div class="onboarding-footer">
+                <button id="prevBtn" disabled>Back</button>
+                <button id="nextBtn">Next</button>
+            </div>
+        </div>
+    </div>
 
     <!-- STAGE 1: THE DOSSIER SEARCH SCREEN -->
-    <div id="introContainer" class="intro-container">
+    <div id="introContainer" class="intro-container" style="display: none;">
         <div class="hero-center-group">
             <h1 class="brand-title">THE DOSSIER</h1>
             <p class="brand-subtitle">Find any moment from any video in seconds.</p>
