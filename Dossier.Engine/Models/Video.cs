@@ -1,5 +1,5 @@
-namespace Dossier.Core.Models;
-using Dossier.Core.Enums;
+namespace Dossier.Engine.Models;
+using Dossier.Engine.Enums;
 
 public class Video
 {

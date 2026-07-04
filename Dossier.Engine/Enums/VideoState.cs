@@ -1,4 +1,4 @@
-namespace Dossier.Core.Enums;
+namespace Dossier.Engine.Enums;
 
 public enum VideoState
 {

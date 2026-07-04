@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dossier.Client.Workers.Base
+namespace Dossier.Engine.Workers.Base
 {
     public abstract class WorkerBase
     {

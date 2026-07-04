@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Dossier.Client.Runtime.FileWatching
+namespace Dossier.Engine.Runtime.FileWatching
 {
     public class FileWatcherService
     {

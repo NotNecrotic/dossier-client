@@ -1,27 +1,30 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dossier.Client.Queues;
-using Dossier.Client.Workers.Base;
+using Dossier.Engine.Queues;
+using Dossier.Engine.Workers.Base;
+using Dossier.Engine.Services;
 
-namespace Dossier.Client.Runtime
+namespace Dossier.Engine.Runtime
 {
     public class ClientEngine
     {
+        private readonly SettingsService _settingsService;
         private readonly List<WorkerBase> _workers = new();
         private readonly JobQueue _jobQueue;
 
         public bool IsRunning { get; private set; }
 
-        public ClientEngine()
+        public ClientEngine(SettingsService settingsService)
         {
+            _settingsService = settingsService;
             _jobQueue = new JobQueue();
         }
 
-        /// <summary>
-        /// Starts the entire client runtime.
-        /// </summary>
+        /// Starts the client runtime.
         public void Start()
         {
+            var settings = _settingsService.Get();
+
             if (IsRunning)
                 return;
 

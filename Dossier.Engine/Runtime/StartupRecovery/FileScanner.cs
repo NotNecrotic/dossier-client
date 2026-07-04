@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Dossier.Client.Runtime.StartupRecovery
+namespace Dossier.Engine.Runtime.StartupRecovery
 {
     public class FileScanner
     {

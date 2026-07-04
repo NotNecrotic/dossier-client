@@ -1,7 +1,7 @@
-using Dossier.Core.Jobs;
-using Dossier.Core.Enums;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
 
-namespace Dossier.Client.Queues
+namespace Dossier.Engine.Queues
 {
     public class JobDispatcher
     {

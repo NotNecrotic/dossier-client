@@ -1,7 +1,7 @@
-using Dossier.Client.Storage;
-using Dossier.Client.Queues;
+using Dossier.Engine.Storage;
+using Dossier.Engine.Queues;
 
-namespace Dossier.Client.Runtime.StartupRecovery
+namespace Dossier.Engine.Runtime.StartupRecovery
 {
     public class RecoveryEngine
     {

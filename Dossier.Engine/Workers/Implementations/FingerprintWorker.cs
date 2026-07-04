@@ -1,12 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dossier.Client.Workers.Base;
-using Dossier.Client.Queues;
-using Dossier.Core.Jobs;
-using Dossier.Core.Enums;
+using Dossier.Engine.Workers.Base;
+using Dossier.Engine.Queues;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
 
-namespace Dossier.Client.Workers.Implementations
+namespace Dossier.Engine.Workers.Implementations
 {
     public class FingerprintWorker : WorkerBase
     {

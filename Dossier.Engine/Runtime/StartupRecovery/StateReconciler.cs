@@ -1,9 +1,9 @@
-using Dossier.Client.Storage;
-using Dossier.Client.Queues;
-using Dossier.Core.Jobs;
-using Dossier.Core.Enums;
+using Dossier.Engine.Storage;
+using Dossier.Engine.Queues;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
 
-namespace Dossier.Client.Runtime.StartupRecovery
+namespace Dossier.Engine.Runtime.StartupRecovery
 {
     public class StateReconciler
     {

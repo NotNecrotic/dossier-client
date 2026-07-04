@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using Dossier.Core.Jobs;
+using Dossier.Engine.Jobs;
 
-namespace Dossier.Client.Queues
+namespace Dossier.Engine.Queues
 {
     public class JobQueue
     {

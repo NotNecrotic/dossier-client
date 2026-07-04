@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Dossier.Client.Workers.Base;
-using Dossier.Client.Queues;
-using Dossier.Core.Jobs;
-using Dossier.Core.Enums;
-using Dossier.Core.Manifest;
+using Dossier.Engine.Workers.Base;
+using Dossier.Engine.Queues;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
+using Dossier.Engine.Manifest;
 
-namespace Dossier.Client.Workers.Implementations
+namespace Dossier.Engine.Workers.Implementations
 {
     public class PreprocessingWorker : WorkerBase
     {

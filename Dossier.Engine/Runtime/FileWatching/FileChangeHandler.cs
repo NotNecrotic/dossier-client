@@ -1,8 +1,8 @@
-using Dossier.Client.Queues;
-using Dossier.Core.Jobs;
-using Dossier.Core.Enums;
+using Dossier.Engine.Queues;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
 
-namespace Dossier.Client.Runtime.FileWatching
+namespace Dossier.Engine.Runtime.FileWatching
 {
     public class FileChangeHandler
     {

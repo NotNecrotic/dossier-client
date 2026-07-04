@@ -1,4 +1,4 @@
-namespace Dossier.Core.Manifest;
+namespace Dossier.Engine.Manifest;
 
 public class VideoManifest
 {
