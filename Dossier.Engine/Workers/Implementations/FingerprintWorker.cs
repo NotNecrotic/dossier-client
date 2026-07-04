@@ -44,6 +44,7 @@ namespace Dossier.Engine.Workers.Implementations
 
                 _dbService.RegisterFingerprint(job.FilePath, fingerprint);
                 job.State = JobState.Fingerprinted;
+                _jobQueue.Enqueue(job);
             }
             catch (Exception ex)
             {
