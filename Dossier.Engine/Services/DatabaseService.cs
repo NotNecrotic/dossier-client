@@ -25,14 +25,6 @@ namespace Dossier.Engine.Services
                 CREATE TABLE IF NOT EXISTS Fingerprints (
                     FilePath TEXT PRIMARY KEY,
                     Fingerprint TEXT
-                );
-
-                CREATE TABLE IF NOT EXISTS Jobs (
-                    JobId TEXT PRIMARY KEY,
-                    Fingerprint TEXT,
-                    FilePath TEXT,
-                    JobState INTEGER,
-                    JobType INTEGER
                 );";
 
             using var command = connection.CreateCommand();
