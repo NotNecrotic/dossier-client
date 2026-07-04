@@ -24,6 +24,8 @@ function openSettingsMenu() {
 
     const closeBtn = document.getElementById("closeSettingsBtn");
     const saveBtn = document.getElementById("saveSettingsBtn");
+    
+    document.getElementById("serverTestResult").textContent = "";
 
     loadSettings();
 
@@ -101,5 +103,56 @@ async function saveSettings() {
 
     } catch (err) {
         console.error("Failed to save settings:", err);
+    }
+}
+
+// ===== TEST SERVER CONNECTION =====
+document.getElementById("testServerBtn").addEventListener("click", async () => {
+    await testServerConnection();
+});
+
+async function testServerConnection() {
+    const serverUrl = document.getElementById("serverUrlInput").value;
+    const serverKey = document.getElementById("serverKeyInput").value;
+
+    const serverTestResult = document.getElementById("serverTestResult");
+
+    const testUrl = `${serverUrl}/api/health`;
+
+    try {
+        const response = await fetch(testUrl, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${serverKey}`
+            }
+        });
+
+        var json = await response.json();
+
+        if (json.Contains("\"serverType\":\"DossierAPI\"")) {
+            if (response.status === 401 || response.status === 403) {
+            serverTestResult.textContent = "Unauthorized: Invalid server key.";
+            serverTestResult.style.color = "red";
+            }
+
+            if (!response.ok) {
+                serverTestResult.textContent = `Error: ${response.status} ${response.statusText}`;
+                serverTestResult.style.color = "red";
+                return;
+            }
+
+            else {
+                serverTestResult.textContent = "Connection successful!";
+                serverTestResult.style.color = "green";
+            }
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            serverTestResult.textContent = "Request timed out.";
+        }
+        else {
+            serverTestResult.textContent = 'Unreachable: Could not connect to the server.';
+            serverTestResult.style.color = "red";
+        }
     }
 }
