@@ -40,6 +40,17 @@ function openSettingsMenu() {
     }
 }
 
+// ===== SELECT FOLDER =====
+const selectFolderBtn = document.getElementById("selectFolderBtn");
+
+selectFolderBtn.addEventListener("click", async () => {
+    const selectedFolder = await window.electronAPI.selectFolder();
+
+    if (selectedFolder) {
+        document.getElementById("watchFolderInput").value = selectedFolder;
+    }
+});
+
 // ===== LOAD SETTINGS FROM CLIENT =====
 async function loadSettings() {
     try {
