@@ -3,20 +3,26 @@ using System.Threading.Tasks;
 using Dossier.Engine.Queues;
 using Dossier.Engine.Workers.Base;
 using Dossier.Engine.Services;
+using Dossier.Engine.Workers.Implementations;
+using Dossier.Engine.Jobs;
+using Dossier.Engine.Enums;
 
 namespace Dossier.Engine.Runtime
 {
     public class ClientEngine
     {
         private readonly SettingsService _settingsService;
+        private readonly DatabaseService _dbService;
         private readonly List<WorkerBase> _workers = new();
         private readonly JobQueue _jobQueue;
+        private FileWatcherService? _watcherService;
 
         public bool IsRunning { get; private set; }
 
-        public ClientEngine(SettingsService settingsService)
+        public ClientEngine(SettingsService settingsService, DatabaseService dbService)
         {
             _settingsService = settingsService;
+            _dbService = dbService;
             _jobQueue = new JobQueue();
         }
 
@@ -33,11 +39,14 @@ namespace Dossier.Engine.Runtime
             InitializeWorkers();
 
             StartWorkers();
+
+            if (!string.IsNullOrEmpty(settings.WatchFolder))
+            {
+                StartWatching(settings.WatchFolder);
+            }
         }
 
-        /// <summary>
         /// Stops all workers and shuts down the system.
-        /// </summary>
         public async Task StopAsync()
         {
             if (!IsRunning)
@@ -55,14 +64,14 @@ namespace Dossier.Engine.Runtime
             IsRunning = false;
         }
 
-        /// <summary>
         /// Creates all worker instances.
-        /// (We will add real workers later.)
-        /// </summary>
         private void InitializeWorkers()
         {
-            // Workers will be added here later:
-            // _workers.Add(new FingerprintWorker(_jobQueue));
+            _workers.Clear();
+
+            // Fingerprint worker
+            _workers.Add(new FingerprintWorker(_jobQueue, _dbService));
+            
             // _workers.Add(new PreprocessingWorker(_jobQueue));
             // _workers.Add(new UploadWorker(_jobQueue));
         }
@@ -84,6 +93,25 @@ namespace Dossier.Engine.Runtime
         public JobQueue GetJobQueue()
         {
             return _jobQueue;
+        }
+
+        public void StartWatching(string folder)
+        {   
+            var existingPaths = new List<string>();
+            _dbService.GetAllFingerprintPaths(existingPaths);
+
+            _watcherService = new FileWatcherService(path => 
+            {
+                var job = new ProcessingJob { FilePath = path, State = JobState.Created };
+                _jobQueue.Enqueue(job);
+            },
+
+            path =>
+            {
+               _dbService.RemoveFingerprint(path); 
+            });
+
+            _watcherService.Start(folder, existingPaths);
         }
     }
 }

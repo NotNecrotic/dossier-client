@@ -4,7 +4,10 @@ using Dossier.Engine.Runtime;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<SettingsService>();
+builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<ClientEngine>();
+
+builder.Services.AddHostedService<EngineBackgroundService>();
 
 builder.Services.AddCors(options =>
 {

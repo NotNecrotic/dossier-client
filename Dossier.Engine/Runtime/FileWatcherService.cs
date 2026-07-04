@@ -2,25 +2,44 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Dossier.Engine.Runtime.FileWatching
+namespace Dossier.Engine.Runtime
 {
     public class FileWatcherService
     {
         private readonly List<FileSystemWatcher> _watchers = new();
         private readonly Action<string> _onFileChanged;
+        private readonly Action<string> _onFileDeleted;
 
-        public FileWatcherService(Action<string> onFileChanged)
+        public FileWatcherService(Action<string> onFileChanged, Action<string> onFileDeleted)
         {
             _onFileChanged = onFileChanged;
+            _onFileDeleted = onFileDeleted;
         }
 
-        public void Start(string[] folders)
+        public void Start(string folder, List<string> dbFilePaths)
         {
-            foreach (var folder in folders)
-            {
-                if (!Directory.Exists(folder))
-                    continue;
+            if (!Directory.Exists(folder))
+                return;
+                
+                // Initial Sync
+                var files = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories);
+                foreach (var file in files)
+                {
+                    if(IsVideo(file))
+                        _onFileChanged?.Invoke(file);
+                }
 
+                // Prune Database
+                var currentFiles = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
+                foreach (var dbPath in dbFilePaths)
+                {
+                    if (!currentFiles.Contains(dbPath))
+                    {
+                        _onFileDeleted?.Invoke(dbPath);
+                    }
+                }
+
+                // Watcher
                 var watcher = new FileSystemWatcher(folder)
                 {
                     IncludeSubdirectories = true,
@@ -37,13 +56,21 @@ namespace Dossier.Engine.Runtime.FileWatching
                 watcher.Changed += OnChanged;
 
                 _watchers.Add(watcher);
-            }
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            if (IsVideo(e.FullPath))
+            if (!IsVideo(e.FullPath))
+                return;
+
+            if (e.ChangeType == WatcherChangeTypes.Deleted)
+            {
+                _onFileDeleted?.Invoke(e.FullPath);
+            }
+            else 
+            {
                 _onFileChanged?.Invoke(e.FullPath);
+            }
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
