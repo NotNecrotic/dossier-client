@@ -482,5 +482,27 @@
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
 </script>
+<script type="module">
+    import { getSettings } from "./api/settingsApi.js";
+
+    async function load() {
+        try {
+            const settings = await getSettings();
+            console.log("Settings loaded:", settings);
+
+            document.body.innerHTML = `
+                <h2>Dossier Settings</h2>
+                <pre>${JSON.stringify(settings, null, 2)}</pre>
+            `;
+        } catch (err) {
+            document.body.innerHTML = `
+                <h2 style="color:red">Engine not connected</h2>
+                <p>${err.message}</p>
+            `;
+        }
+    }
+
+    load();
+</script>
 </body>
 </html>
