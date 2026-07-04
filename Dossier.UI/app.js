@@ -68,7 +68,7 @@ async function loadSettings() {
         document.getElementById("startOnBootInput").checked = settings.startOnBoot ?? false;
         document.getElementById("startMinimizedInput").checked = settings.startMinimized ?? false;
 
-        document.getElementById("themeInput").value = settings.theme || "ddark";
+        document.getElementById("themeInput").value = settings.theme || "dark";
 
     } catch (err) {
         console.error("Failed to load settings:", err);
