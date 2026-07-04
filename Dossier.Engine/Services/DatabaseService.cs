@@ -20,12 +20,6 @@ namespace Dossier.Engine.Services
         {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
-
-            using (var pragmaCmd = connection.CreateCommand())
-            {
-                pragmaCmd.CommandText = "PRAGMA journal_mode=WAL;";
-                pragmaCmd.ExecuteNonQuery();
-            }
             
             var script = @"
                 CREATE TABLE IF NOT EXISTS Fingerprints (
