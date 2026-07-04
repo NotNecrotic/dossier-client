@@ -4,7 +4,7 @@ public class Settings
 {
     public string ServerUrl { get; set; } = "";
 
-    public List<string> WatchFolders { get; set; } = new();
+    public string WatchFolder { get; set; } = "";
 
     public bool StartOnBoot { get; set; } = false;
 

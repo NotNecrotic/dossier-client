@@ -6,6 +6,7 @@
     <title>The Dossier - AI Video Indexer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+<script type="module" src="./app.js"></script>
 <body>
 
     <!-- STAGE 1: THE DOSSIER SEARCH SCREEN -->
@@ -103,24 +104,81 @@
 
     <!-- GLOBAL SETTINGS MODAL LAYER -->
     <div class="modal-overlay" id="settingsModal">
+
         <div class="settings-card">
-            <h3>⚙️ System Configurations</h3>
+            <h3>⚙️ Dossier Settings</h3>
+
+            <!-- SERVER -->
             <div class="settings-group">
-                <label>Storage Index Directory</label>
-                <input type="text" id="storagePathInput" placeholder="C:\Dossier\Clips" value="C:\Dossier\Clips">
+                <label>Server URL</label>
+                <input type="text" id="serverUrlInput" placeholder="http://127.0.0.1:5187">
+
+                <label>Server Key</label>
+                <input type="text" id="serverKeyInput" placeholder="Enter your server key">
+                
+                <div class="server-test-connection">
+                    <button id="testServerBtn" title="Test Connection">Test Connection</button>
+                    <span id="serverTestResult" class="server-test-result">Connection not tested</span>
+                </div>
+                
             </div>
+
+            <!-- WATCH FOLDER -->
             <div class="settings-group">
-                <label>Discord Bot Sync Hook Token</label>
-                <input type="password" id="hookTokenInput" placeholder="MTA5... hidden identifier token">
+                <label>Watch Folder</label>
+                <input type="text" id="watchFolderInput" placeholder="Enter the path to the video folder">
             </div>
+
+            <!-- PERFORMANCE -->
+            <div class="settings-group">
+                <label>Upload Limit (Mbps)</label>
+                <input type="number" id="uploadLimitInput" min="0">
+            </div>
+
+            <div class="settings-group">
+                <label>CPU Limit (%)</label>
+                <input type="number" id="cpuLimitInput" min="1" max="100">
+            </div>
+
+            <div class="settings-group">
+                <label>Frame Sampling Interval (seconds)</label>
+                <input type="number" id="frameIntervalInput" min="1">
+            </div>
+
+            <!-- BEHAVIOUR -->
+            <div class="settings-group checkbox">
+                <label>
+                    <input type="checkbox" id="startOnBootInput">
+                    Start on Windows boot
+                </label>
+            </div>
+
+            <div class="settings-group checkbox">
+                <label>
+                    <input type="checkbox" id="startMinimizedInput">
+                    Start minimized to tray
+                </label>
+            </div>
+
+            <!-- THEME -->
+            <div class="settings-group">
+                <label>Theme</label>
+                <select id="themeInput">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                </select>
+            </div>
+
+            <!-- FOOTER -->
             <div class="modal-footer">
-                <button type="button" class="btn-close-modal" id="closeSettingsBtn">Cancel</button>
-                <button type="button" class="btn-save-modal" id="saveSettingsBtn">Apply Changes</button>
+                <button type="button" id="closeSettingsBtn">Cancel</button>
+                <button type="button" id="saveSettingsBtn">Save Changes</button>
             </div>
+
         </div>
     </div>
 
-<script>
+<!-- <script>
         // State Engine
         let currentDirectoryPath = "";
         let currentlyPlayingUrl = "";
@@ -481,28 +539,6 @@
             chatHistory.appendChild(container);
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
-</script>
-<script type="module">
-    import { getSettings } from "./api/settingsApi.js";
-
-    async function load() {
-        try {
-            const settings = await getSettings();
-            console.log("Settings loaded:", settings);
-
-            document.body.innerHTML = `
-                <h2>Dossier Settings</h2>
-                <pre>${JSON.stringify(settings, null, 2)}</pre>
-            `;
-        } catch (err) {
-            document.body.innerHTML = `
-                <h2 style="color:red">Engine not connected</h2>
-                <p>${err.message}</p>
-            `;
-        }
-    }
-
-    load();
-</script>
+</script> -->
 </body>
 </html>
