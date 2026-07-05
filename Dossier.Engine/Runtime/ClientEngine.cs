@@ -13,16 +13,21 @@ namespace Dossier.Engine.Runtime
     {
         private readonly SettingsService _settingsService;
         private readonly DatabaseService _dbService;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<UploadWorker> _logger;
+
         private readonly List<WorkerBase> _workers = new();
         private readonly JobQueue _jobQueue;
         private FileWatcherService? _watcherService;
 
         public bool IsRunning { get; private set; }
 
-        public ClientEngine(SettingsService settingsService, DatabaseService dbService)
+        public ClientEngine(SettingsService settingsService, DatabaseService dbService, HttpClient httpClient, ILogger<UploadWorker> logger)
         {
             _settingsService = settingsService;
             _dbService = dbService;
+            _httpClient = httpClient;
+            _logger = logger;
             _jobQueue = new JobQueue();
         }
 
@@ -72,10 +77,9 @@ namespace Dossier.Engine.Runtime
             // Fingerprint worker
             _workers.Add(new FingerprintWorker(_jobQueue, _dbService));
             _workers.Add(new PreprocessingWorker(_jobQueue, _settingsService));
-
-            // _workers.Add(new UploadWorker(_jobQueue));
+            _workers.Add(new UploadWorker(_jobQueue, _settingsService, _httpClient, _logger));
         }
-
+        
         /// <summary>
         /// Starts all workers.
         /// </summary>

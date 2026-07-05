@@ -13,18 +13,21 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 using System.Security.Cryptography;
+using Dossier.Engine.Services;
 
 namespace Dossier.Engine.Workers.Implementations
 {
     public class UploadWorker : WorkerBase
     {
         private readonly JobQueue _jobQueue;
+        private readonly SettingsService _settingsService;
         private readonly HttpClient _httpClient;
         private readonly ILogger<UploadWorker> _logger;
 
-        public UploadWorker(JobQueue jobQueue, HttpClient httpClient, ILogger<UploadWorker> logger)
+        public UploadWorker(JobQueue jobQueue, SettingsService settingsService, HttpClient httpClient, ILogger<UploadWorker> logger)
         {
             _jobQueue = jobQueue;
+            _settingsService = settingsService;
             _httpClient = httpClient;
             _logger = logger;
         }
@@ -55,10 +58,13 @@ namespace Dossier.Engine.Workers.Implementations
                     await UploadFile(session.Token, audioPath, token);
                 }
 
-                var ManifestHash = GenerateManifestHash(manifest);
-                var request = new HttpRequestMessage(HttpMethod.Post, "/api/sessions/validate");
+                var settings = _settingsService.Get();
+                var manifestHash = GenerateManifestHash(manifest);
+                var url = new Uri(new Uri(settings.ServerUrl), "/api/sessions/validate");
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Add("X-Client-Identifier", settings.ServerKey);
                 request.Headers.Add("X-Session-Token", session.Token);
-                request.Headers.Add("X-Manifest-Hash", ManifestHash);
+                request.Headers.Add("X-Manifest-Hash", manifestHash);
 
                 var validateResult = await _httpClient.SendAsync(request, token);
                 validateResult.EnsureSuccessStatusCode();
@@ -84,21 +90,43 @@ namespace Dossier.Engine.Workers.Implementations
             return Convert.ToHexString(hashBytes);
         }
         private async Task<UploadSessionResponse?> RequestUploadSessionAsync(VideoManifest manifest, CancellationToken token)
-        {
-            var response = await _httpClient.PostAsJsonAsync("/api/sessions/request", manifest, token);
-            return response.IsSuccessStatusCode 
-                ? await response.Content.ReadFromJsonAsync<UploadSessionResponse>(cancellationToken: token) 
+        {   
+            var settings = _settingsService.Get();
+            var url = new Uri(new Uri(settings.ServerUrl), "/api/sessions/request");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = JsonContent.Create(manifest)
+            };
+
+            request.Headers.Add("X-Client-Identifier", settings.ServerKey);
+
+            var response = await _httpClient.SendAsync(request, token);
+
+            return response.IsSuccessStatusCode
+                ? await response.Content.ReadFromJsonAsync<UploadSessionResponse>(cancellationToken: token)
                 : null;
         }
 
         private async Task UploadFile(string sessionToken, string filePath, CancellationToken token)
         {
             var fileInfo = new FileInfo(filePath);
+            var settings = _settingsService.Get();
+
             using var stream = fileInfo.OpenRead();
             var content = new StreamContent(stream);
+            
+            content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        
+            var url = new Uri(new Uri(settings.ServerUrl), "/api/upload");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/api/upload");
-    
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = content
+            };
+
+            request.Headers.Add("X-Client-Identifier", settings.ServerKey);
             request.Headers.Add("X-Session-Token", sessionToken);
 
             var response = await _httpClient.SendAsync(request, token);
