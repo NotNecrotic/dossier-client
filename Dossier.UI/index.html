@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <script type="module" src="./app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <body>
     <!-- ONBOARDING -->
     <div id="onboardingOverlay" class="onboarding-overlay hidden">
@@ -14,34 +15,58 @@
             <div class="onboarding-progress">
                 <div class="onboarding-progress-fill" id="onboardingProgress"></div>
             </div>
-            
+
             <div class="onboarding-step active" id="step1">
-                <h2>Welcome to The Dossier</h2>
-                <p>Let's configure your environment to start indexing and searching your media library.</p>
+                <div class="onboarding-header">
+                    <img src="icon.png" alt="Dossier Logo" class="header-icon">
+                    <h2>Welcome to The Dossier</h2>
+                </div>
+                
+                <p>The Dossier is an intelligent, AI powered, local indexing engine. It scans your videos, compiles metadata, and indexes it into an instantly searchable database.</p>
+                <p>Built so you don't spend ages hunting through folders of videos to find that one specific moment you're looking for. Type a quote, search a tag, and jump straight to the timestamp.</p>
+                <p style="margin-bottom: 2rem;">Let's configure your environment to start indexing and searching your media library.</p>
             </div>
 
             <div class="onboarding-step" id="step2">
-                <h2>Source Directory</h2>
-                <p>Select the folder where your video assets are stored.</p>
-                <input type="text" id="obWatchFolder" placeholder="Path to video folder...">
-                <button onclick="browseFolder()">Browse</button>
+                <div class="onboarding-header">
+                    <i data-lucide="folder-cog"></i>
+                    <h2>Source Directory</h2>
+                </div>
+                <p>Select the folder that Dossier will process videos from.</p>
+                <div class="folder-input-group">
+                    <input type="text" id="obWatchFolder" placeholder="Path to video folder...">
+                    <button id="selectFolderBtn" class="browse-folder-button" onclick="browseFolder()">
+                        <i data-lucide="folder"></i>
+                    </button>
+                </div>
+                
             </div>
 
             <div class="onboarding-step" id="step3">
-                <h2>Server Configuration</h2>
+                <div class="onboarding-header">
+                    <i data-lucide="cog"></i>
+                    <h2>Server Configuration</h2>
+                </div>
                 <p>Enter your Dossier server details to enable AI processing.</p>
                 <input type="text" id="obServerUrl" placeholder="Server URL (e.g., http://127.0.0.1:5187)">
                 <input type="password" id="obServerKey" placeholder="Server Secret Key">
             </div>
 
             <div class="onboarding-step" id="step4">
-                <h2>Appearance</h2>
+                <div class="onboarding-header">
+                    <i data-lucide="palette"></i>
+                    <h2>Appearance</h2>
+                </div>
                 <p>Choose your preferred interface theme.</p>
-                <select id="obTheme">
-                    <option value="system">System Default</option>
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                </select>
+                <div class="select-wrapper">
+                    <select id="obTheme">
+                        <option value="system">System Default</option>
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+
+                    <i data-lucide="chevron-down"></i>
+                </div>
             </div>
 
             <div class="onboarding-footer">
@@ -583,5 +608,8 @@
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
 </script> -->
+<script>
+  lucide.createIcons();
+</script>
 </body>
 </html>

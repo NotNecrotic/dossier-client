@@ -91,7 +91,7 @@ selectFolderBtn.addEventListener("click", async () => {
     const selectedFolder = await window.electronAPI.selectFolder();
 
     if (selectedFolder) {
-        document.getElementById("watchFolderInput").value = selectedFolder;
+        document.getElementById("obWatchFolder").value = selectedFolder;
     }
 });
 
@@ -210,10 +210,13 @@ function initOnboarding() {
 
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
+    
+    updateProgressBar();
 
     nextBtn.onclick = () => {
         if (currentStep < totalSteps) {
             showStep(currentStep + 1);
+            
         } else {
             completeOnboarding();
         }
@@ -229,10 +232,19 @@ function showStep(stepIndex) {
     document.getElementById(`step${stepIndex}`).classList.add("active");
     
     currentStep = stepIndex;
+    updateProgressBar();
     
     // Update button states
     document.getElementById("prevBtn").disabled = (currentStep === 1);
     document.getElementById("nextBtn").textContent = (currentStep === totalSteps) ? "Finish" : "Next";
+}
+
+function updateProgressBar() {
+    const progressFill = document.getElementById("onboardingProgress");
+
+    const percent = (currentStep - 1) / (totalSteps - 1) * 100;
+
+    progressFill.style.width = `${percent}%`;
 }
 
 async function completeOnboarding() {
