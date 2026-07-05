@@ -293,6 +293,7 @@
             transform: translateY(-30px);
             opacity: 0;
             pointer-events: none;
+            display: none;
         }
 
         .hero-section {

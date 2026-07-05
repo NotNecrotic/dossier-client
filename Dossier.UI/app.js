@@ -232,7 +232,7 @@ async function completeOnboarding() {
 
     // Hide onboarding and reveal search screen
     document.getElementById("onboardingOverlay").style.display = "none";
-    document.getElementById("introContainer").style.display = "flex";
+    document.getElementById("introContainer").classList.remove("collapsed");
 }
 
 // Ensure you call initOnboarding on load
