@@ -3,7 +3,14 @@ import { getSettings, updateSettings } from "./api/settingsApi.js";
 // ===== BOOTSTRAP =====
 document.addEventListener("DOMContentLoaded", () => {
     wireUI();
+    initOnboarding();
 });
+
+// ===== VARIABLES =====
+const BACKEND_BASE_URL = 'http://127.0.0.1:5187';
+let currentDirectoryPath = "";
+let currentlyPlayingUrl = "";
+let fileListContainer = document.getElementById("fileListContainer");
 
 // ===== DOM ELEMENTS =====
 const introContainer = document.getElementById("introContainer");
@@ -31,6 +38,7 @@ function wireUI() {
 function switchToDashboard() {
     introContainer.classList.add('collapsed');
     appContainer.classList.add('active');
+    loadDirectory("");
 }
 
 function switchToHomeSearch() {
@@ -235,8 +243,110 @@ async function completeOnboarding() {
     document.getElementById("introContainer").classList.remove("collapsed");
 }
 
-// Ensure you call initOnboarding on load
-document.addEventListener("DOMContentLoaded", () => {
-    wireUI();
-    initOnboarding();
-});
+
+
+
+
+// --- File System Operations ---
+async function loadDirectory(path = "") {
+    // Base API endpoint
+    const baseUrl = 'http://127.0.0.1:5187/api/files';
+    
+    // If a path is requested, append it as a query string; otherwise, request root
+    const url = path ? `${baseUrl}?path=${encodeURIComponent(path)}` : baseUrl;
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `Server responded with ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Update state based on what the controller provides
+        currentDirectoryPath = data.currentPath || ""; 
+        
+        // Update UI displays
+        currentPathDisplay.textContent = `/${currentDirectoryPath || 'root'}`;
+        backBtn.style.display = currentDirectoryPath ? "block" : "none";
+        
+        // Render the items returned by C#
+        renderFileSystemItems(data.items || []);
+        
+    } catch (err) {
+        console.error("Layout load failure:", err);
+        fileListContainer.innerHTML = `
+            <div class="error-msg">
+                Dossier service unreachable or error loading directory: ${err.message}
+            </div>`;
+    }
+}
+
+// Example of how folder clicking links back into this function inside renderFileSystemItems:
+function handleItemClick(item, rowElement) {
+    const type = item.type || item.Type;
+
+    if (type === 'directory') {
+        // Pass the relative path returned by C# back into loadDirectory
+        loadDirectory(item.path);
+    } else if (type === 'video') {
+        const targetVideoUrl = `${BACKEND_BASE_URL}/api/video/${item.path}`;
+        
+        // Trigger your video player
+        playTargetVideo(targetVideoUrl, item);
+        
+        // Update visual active state in the list
+        document.querySelectorAll('.file-item.active').forEach(el => el.classList.remove('active'));
+        if (rowElement) {
+            rowElement.classList.add('active');
+        }
+    }
+}
+
+function renderFileSystemItems(items) {
+    fileListContainer.innerHTML = "";
+    
+    if (!items || items.length === 0) {
+        fileListContainer.innerHTML = `<div class="no-video-placeholder">Empty Directory</div>`;
+        return;
+    }
+
+    items.forEach(item => {
+        // Standardize property access (handles both camelCase and PascalCase from C#)
+        const type = item.type || item.Type; 
+        const name = item.name || item.Name;
+        const isVideo = type === 'video';
+
+        // Construct the exact video URL for active state checking
+        const itemVideoUrl = `${BACKEND_BASE_URL}/api/video/${item.path}`;
+
+        // Accessing metadata safely
+        const metadata = item.metadata || item.Metadata || {};
+        const hasSubs = isVideo && metadata.has_subtitles;
+        const isScanned = metadata.has_metadata;
+
+        const row = document.createElement('div');
+        
+        // Check if this row is the currently playing video
+        const isActive = isVideo && (currentlyPlayingUrl === itemVideoUrl);
+        row.className = `file-item ${type} ${isActive ? 'active' : ''}`;
+
+        // Create badges
+        const subBadge = hasSubs ? `<span class="sub-badge">CC</span>` : '';
+        const unscannedBadge = !isScanned ? `<span class="unscanned-badge">No Metadata</span>` : '';
+        
+        row.innerHTML = `
+            <span class="file-icon">${type === 'directory' ? '📁' : '🎞️'}</span>
+            <span class="file-name">${name}${subBadge}${unscannedBadge}</span>
+            <span class="file-meta">${item.size_mb || 0} MB</span>
+        `;
+
+        // Attach clean event listener that passes the item and the UI row element
+        row.addEventListener('click', () => {
+            handleItemClick(item, row);
+        });
+
+        fileListContainer.appendChild(row);
+    });
+}
