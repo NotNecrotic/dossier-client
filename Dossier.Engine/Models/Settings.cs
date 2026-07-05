@@ -8,6 +8,8 @@ public class Settings
 
     public string WatchFolder { get; set; } = "";
 
+    public bool Onboarding { get; set; } = true;
+
     public bool StartOnBoot { get; set; } = false;
 
     public bool StartMinimized { get; set; } = false;

@@ -8,9 +8,12 @@
 </head>
 <script type="module" src="./app.js"></script>
 <body>
-    <!-- STAGE 0: ONBOARDING -->
-    <div id="onboardingOverlay" class="onboarding-overlay">
+    <!-- ONBOARDING -->
+    <div id="onboardingOverlay" class="onboarding-overlay hidden">
         <div class="onboarding-card" id="onboardingCard">
+            <div class="onboarding-progress">
+                <div class="onboarding-progress-fill" id="onboardingProgress"></div>
+            </div>
             
             <div class="onboarding-step active" id="step1">
                 <h2>Welcome to The Dossier</h2>
@@ -49,7 +52,7 @@
     </div>
 
     <!-- STAGE 1: THE DOSSIER SEARCH SCREEN -->
-    <div id="introContainer" class="intro-container collapsed">
+    <div id="introContainer" class="intro-container hidden">
         <div class="hero-center-group">
             <h1 class="brand-title">THE DOSSIER</h1>
             <p class="brand-subtitle">Find any moment from any video in seconds.</p>
@@ -90,7 +93,7 @@
     </div>
 
     <!-- STAGE 2: MAIN WORKING CONSOLE MATRIX -->
-    <div class="app-container" id="appContainer">
+    <div class="app-container hidden" id="appContainer">
         <!-- 1. Side File Explorer -->
         <div class="sidebar">
             <div class="panel-header">

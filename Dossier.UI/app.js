@@ -3,7 +3,7 @@ import { getSettings, updateSettings } from "./api/settingsApi.js";
 // ===== BOOTSTRAP =====
 document.addEventListener("DOMContentLoaded", () => {
     wireUI();
-    initOnboarding();
+    initStartup();
 });
 
 // ===== VARIABLES =====
@@ -18,7 +18,6 @@ const appContainer = document.getElementById("appContainer");
 
 // ===== UI WIRING =====
 function wireUI() {
-
     const settingsBtn = document.getElementById("triggerSettingsBtn");
     const manualExplorerBtn = document.getElementById("manualExploreBtn");
     const exitDashboardBtn = document.getElementById("exitDashboardBtn");
@@ -34,16 +33,28 @@ function wireUI() {
     }
 }
 
+// ===== STARTUP =====
+async function initStartup() {
+    const settings = await getSettings();
+    const onboarding = settings.Onboarding ?? true;
+
+    if (onboarding) {
+        initOnboarding();
+    } else {
+        switchToHomeSearch();
+    }
+}
+
 // ===== HELPER FUNCTIONS =====
 function switchToDashboard() {
-    introContainer.classList.add('collapsed');
-    appContainer.classList.add('active');
+    introContainer.classList.add('hidden');
+    appContainer.classList.remove('hidden');
     loadDirectory("");
 }
 
 function switchToHomeSearch() {
-    appContainer.classList.remove('active');
-    introContainer.classList.remove('collapsed');
+    appContainer.classList.add('hidden');
+    introContainer.classList.remove('hidden');
 }
 
 // ===== SETTINGS MODAL =====
@@ -193,6 +204,10 @@ let currentStep = 1;
 const totalSteps = 4;
 
 function initOnboarding() {
+    const onboardingOverlay = document.getElementById("onboardingOverlay");
+    onboardingOverlay.classList.remove("hidden");
+    console.log("Onboarding initialized. Current step:", currentStep);
+
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
 
@@ -239,8 +254,8 @@ async function completeOnboarding() {
     await updateSettings(onboardingSettings);
 
     // Hide onboarding and reveal search screen
-    document.getElementById("onboardingOverlay").style.display = "none";
-    document.getElementById("introContainer").classList.remove("collapsed");
+    document.getElementById("onboardingOverlay").classList.add("hidden");
+    document.getElementById("introContainer").classList.remove("hidden");
 }
 
 
