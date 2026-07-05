@@ -74,7 +74,6 @@ namespace Dossier.Engine.Runtime
         {
             _workers.Clear();
 
-            // Fingerprint worker
             _workers.Add(new FingerprintWorker(_jobQueue, _dbService));
             _workers.Add(new PreprocessingWorker(_jobQueue, _settingsService));
             _workers.Add(new UploadWorker(_jobQueue, _settingsService, _httpClient, _logger));

@@ -26,7 +26,10 @@ namespace Dossier.Engine.Workers.Implementations
                 return Task.FromResult(false);
 
             if (job.State != JobState.Created)
+            {
+                _jobQueue.Enqueue(job);
                 return Task.FromResult(false);
+            }
 
             ProcessFingerprint(job);
 

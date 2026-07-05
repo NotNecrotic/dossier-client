@@ -5,14 +5,37 @@ document.addEventListener("DOMContentLoaded", () => {
     wireUI();
 });
 
+// ===== DOM ELEMENTS =====
+const introContainer = document.getElementById("introContainer");
+const appContainer = document.getElementById("appContainer");
+
 // ===== UI WIRING =====
 function wireUI() {
 
     const settingsBtn = document.getElementById("triggerSettingsBtn");
+    const manualExplorerBtn = document.getElementById("manualExploreBtn");
+    const exitDashboardBtn = document.getElementById("exitDashboardBtn");
 
     if (settingsBtn) {
         settingsBtn.onclick = () => openSettingsMenu();
     }
+    if (manualExplorerBtn) {
+        manualExplorerBtn.onclick = () => switchToDashboard();
+    }
+    if (exitDashboardBtn) {
+        exitDashboardBtn.onclick = () => switchToHomeSearch();
+    }
+}
+
+// ===== HELPER FUNCTIONS =====
+function switchToDashboard() {
+    introContainer.classList.add('collapsed');
+    appContainer.classList.add('active');
+}
+
+function switchToHomeSearch() {
+    appContainer.classList.remove('active');
+    introContainer.classList.remove('collapsed');
 }
 
 // ===== SETTINGS MODAL =====

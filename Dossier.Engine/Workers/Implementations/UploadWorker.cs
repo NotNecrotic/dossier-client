@@ -32,13 +32,20 @@ namespace Dossier.Engine.Workers.Implementations
             _logger = logger;
         }
 
-        protected override async Task<bool> TryProcessNextJobAsync(CancellationToken token)
+        protected override Task<bool> TryProcessNextJobAsync(CancellationToken token)
         {
-            if (!_jobQueue.TryDequeue(out var job) || job == null) return false;
-            if (job.State != JobState.Preprocessed && job.State != JobState.AwaitingUpload) return false;
+            if (!_jobQueue.TryDequeue(out ProcessingJob? job) || job == null)
+                return Task.FromResult(false);
 
-            await ProcessUploadAsync(job, token);
-            return true;
+            if (job.State != JobState.Preprocessed)
+            {
+                _jobQueue.Enqueue(job);
+                return Task.FromResult(false);
+            }
+            
+            ProcessUploadAsync(job, token);
+            
+            return Task.FromResult(true);
         }
 
         private async Task ProcessUploadAsync(ProcessingJob job, CancellationToken token)
@@ -51,11 +58,12 @@ namespace Dossier.Engine.Workers.Implementations
                 var session = await RequestUploadSessionAsync(manifest, token);
                 if (session == null) throw new Exception("Upload session handshake failed.");
 
-                await UploadFile(session.Token, manifest.ProxyPath, token);
+                await UploadFile(session.session, job.ManifestPath, fileType: "manifest", token);
+                await UploadFile(session.session, manifest.ProxyPath, fileType: "proxy", token);
 
                 foreach (var audioPath in manifest.AudioPaths)
                 {
-                    await UploadFile(session.Token, audioPath, token);
+                    await UploadFile(session.session, audioPath, fileType: "audio", token);
                 }
 
                 var settings = _settingsService.Get();
@@ -63,7 +71,7 @@ namespace Dossier.Engine.Workers.Implementations
                 var url = new Uri(new Uri(settings.ServerUrl), "/api/sessions/validate");
                 var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.Add("X-Client-Identifier", settings.ServerKey);
-                request.Headers.Add("X-Session-Token", session.Token);
+                request.Headers.Add("X-Session-Token", session.session);
                 request.Headers.Add("X-Manifest-Hash", manifestHash);
 
                 var validateResult = await _httpClient.SendAsync(request, token);
@@ -94,31 +102,40 @@ namespace Dossier.Engine.Workers.Implementations
             var settings = _settingsService.Get();
             var url = new Uri(new Uri(settings.ServerUrl), "/api/sessions/request");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, url)
-            {
-                Content = JsonContent.Create(manifest)
-            };
-
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("X-Client-Identifier", settings.ServerKey);
 
             var response = await _httpClient.SendAsync(request, token);
 
-            return response.IsSuccessStatusCode
-                ? await response.Content.ReadFromJsonAsync<UploadSessionResponse>(cancellationToken: token)
-                : null;
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<UploadSessionResponse>(cancellationToken: token);
+            }
+    
+            return null;
         }
 
-        private async Task UploadFile(string sessionToken, string filePath, CancellationToken token)
+        private async Task UploadFile(string sessionToken, string filePath, string fileType, CancellationToken token)
         {
             var fileInfo = new FileInfo(filePath);
             var settings = _settingsService.Get();
 
-            using var stream = fileInfo.OpenRead();
-            var content = new StreamContent(stream);
+            await using var stream = new FileStream(
+                filePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 1024 * 1024,
+                useAsync: true
+            );
+            
+            using var content = new StreamContent(stream);
             
             content.Headers.ContentType =
                 new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-        
+
+            content.Headers.ContentLength = fileInfo.Length;
+
             var url = new Uri(new Uri(settings.ServerUrl), "/api/upload");
 
             var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -129,7 +146,17 @@ namespace Dossier.Engine.Workers.Implementations
             request.Headers.Add("X-Client-Identifier", settings.ServerKey);
             request.Headers.Add("X-Session-Token", sessionToken);
 
-            var response = await _httpClient.SendAsync(request, token);
+            request.Headers.Add("X-File-Type", fileType);
+            request.Headers.Add("X-Filename", fileInfo.Name);
+
+            var response = await _httpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                token
+            );
+            
+            var body = await response.Content.ReadAsStringAsync(token);
+
             response.EnsureSuccessStatusCode();
         }
 
@@ -142,6 +169,6 @@ namespace Dossier.Engine.Workers.Implementations
 
     public class UploadSessionResponse
     {
-        public string Token { get; set; } = string.Empty;
+        public string session { get; set; } = string.Empty;
     }
 }

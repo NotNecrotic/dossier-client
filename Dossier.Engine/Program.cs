@@ -3,6 +3,8 @@ using Dossier.Engine.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddSingleton<SettingsService>();
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<ClientEngine>();
