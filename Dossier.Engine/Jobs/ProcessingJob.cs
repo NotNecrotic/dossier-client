@@ -9,6 +9,8 @@ public class ProcessingJob
 
     public string FilePath { get; set; } = string.Empty;
 
+    public string ManifestPath { get; set; } = string.Empty;
+
     public JobState State { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

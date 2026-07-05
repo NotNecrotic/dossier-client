@@ -43,8 +43,8 @@ namespace Dossier.Engine.Workers.Implementations
             {
                 job.State = JobState.Preprocessing;
 
-                //var tempFolder = Path.Combine(Path.GetTempPath(), "Dossier", job.Fingerprint);
-                var tempFolder = Path.Combine(@"C:\DossierTest", job.Fingerprint);
+                var tempFolder = Path.Combine(Path.GetTempPath(), "Dossier", job.Fingerprint);
+                //var tempFolder = Path.Combine(@"C:\DossierTest", job.Fingerprint);
                 Directory.CreateDirectory(tempFolder);
 
                 var audioPaths = ExtractAudio(job.FilePath, tempFolder, token);
@@ -60,7 +60,9 @@ namespace Dossier.Engine.Workers.Implementations
 
                 SaveManifest(manifest, tempFolder);
 
+                job.ManifestPath = Path.Combine(tempFolder, "manifest.json");
                 job.State = JobState.Preprocessed;
+                _jobQueue.Enqueue(job);
             }
             catch (Exception ex)
             {

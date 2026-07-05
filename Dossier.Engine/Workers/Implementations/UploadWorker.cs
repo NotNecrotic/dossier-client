@@ -1,109 +1,119 @@
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Dossier.Engine.Manifest;
 using Dossier.Engine.Workers.Base;
-using Dossier.Engine.Queues;
 using Dossier.Engine.Jobs;
+using Dossier.Engine.Queues;
 using Dossier.Engine.Enums;
+using Microsoft.Extensions.Logging;
+using System.Text;
+using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace Dossier.Engine.Workers.Implementations
 {
     public class UploadWorker : WorkerBase
     {
         private readonly JobQueue _jobQueue;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<UploadWorker> _logger;
 
-        public UploadWorker(JobQueue jobQueue)
+        public UploadWorker(JobQueue jobQueue, HttpClient httpClient, ILogger<UploadWorker> logger)
         {
             _jobQueue = jobQueue;
+            _httpClient = httpClient;
+            _logger = logger;
         }
 
-        protected override Task<bool> TryProcessNextJobAsync(CancellationToken token)
+        protected override async Task<bool> TryProcessNextJobAsync(CancellationToken token)
         {
-            if (!_jobQueue.TryDequeue(out ProcessingJob? job) || job == null)
-                return Task.FromResult(false);
+            if (!_jobQueue.TryDequeue(out var job) || job == null) return false;
+            if (job.State != JobState.Preprocessed && job.State != JobState.AwaitingUpload) return false;
 
-            if (job.State != JobState.Preprocessed && job.State != JobState.AwaitingUpload)
-                return Task.FromResult(false);
-
-            ProcessUpload(job, token);
-
-            return Task.FromResult(true);
+            await ProcessUploadAsync(job, token);
+            return true;
         }
 
-        private void ProcessUpload(ProcessingJob job, CancellationToken token)
+        private async Task ProcessUploadAsync(ProcessingJob job, CancellationToken token)
         {
             try
             {
                 job.State = JobState.Uploading;
+                var manifest = await LoadManifestAsync(job.ManifestPath, token);
 
-                // STEP 1: Request upload session from server
-                var uploadToken = RequestUploadSession(job);
+                var session = await RequestUploadSessionAsync(manifest, token);
+                if (session == null) throw new Exception("Upload session handshake failed.");
 
-                if (uploadToken == null)
+                await UploadFile(session.Token, manifest.ProxyPath, token);
+
+                foreach (var audioPath in manifest.AudioPaths)
                 {
-                    job.State = JobState.AwaitingUpload;
-                    return;
+                    await UploadFile(session.Token, audioPath, token);
                 }
 
-                // STEP 2: Upload manifest
-                UploadFile(uploadToken, "manifest.json");
+                var ManifestHash = GenerateManifestHash(manifest);
+                var request = new HttpRequestMessage(HttpMethod.Post, "/api/sessions/validate");
+                request.Headers.Add("X-Session-Token", session.Token);
+                request.Headers.Add("X-Manifest-Hash", ManifestHash);
 
-                // STEP 3: Upload audio
-                UploadFile(uploadToken, "audio.aac");
-
-                // STEP 4: Upload frames
-                UploadFrames(uploadToken);
-
-                // STEP 5: Finalise upload
-                var serverUuid = FinaliseUpload(uploadToken);
+                var validateResult = await _httpClient.SendAsync(request, token);
+                validateResult.EnsureSuccessStatusCode();
 
                 job.State = JobState.Uploaded;
-                job.Fingerprint = job.Fingerprint; // already set
-                job.FilePath = job.FilePath;
-
-                // NOTE:
-                // later we will store:
-                // fingerprint ↔ UUID mapping in SQLite cache
-
+                _logger.LogInformation("Job {Id} uploaded successfully.", job.JobId);
             }
             catch (Exception ex)
             {
                 job.State = JobState.Failed;
-                OnError(ex);
+                _logger.LogError(ex, "Upload failed for job {JobId}", job.JobId);
             }
         }
 
-        private string? RequestUploadSession(ProcessingJob job)
+        private string GenerateManifestHash(VideoManifest manifest)
         {
-            // Placeholder for server API call
-            // In real system:
-            // - HTTP request with fingerprint + size + manifest info
-
-            return Guid.NewGuid().ToString(); // simulate approved session
+            string jsonString = JsonSerializer.Serialize(manifest);
+            
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
+            
+            byte[] hashBytes = SHA256.HashData(bytes);
+            
+            return Convert.ToHexString(hashBytes);
+        }
+        private async Task<UploadSessionResponse?> RequestUploadSessionAsync(VideoManifest manifest, CancellationToken token)
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/sessions/request", manifest, token);
+            return response.IsSuccessStatusCode 
+                ? await response.Content.ReadFromJsonAsync<UploadSessionResponse>(cancellationToken: token) 
+                : null;
         }
 
-        private void UploadFile(string token, string fileName)
+        private async Task UploadFile(string sessionToken, string filePath, CancellationToken token)
         {
-            // Placeholder upload logic
-            // Real version: HTTP chunk streaming
+            var fileInfo = new FileInfo(filePath);
+            using var stream = fileInfo.OpenRead();
+            var content = new StreamContent(stream);
 
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), fileName), "UPLOADED");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/upload");
+    
+            request.Headers.Add("X-Session-Token", sessionToken);
+
+            var response = await _httpClient.SendAsync(request, token);
+            response.EnsureSuccessStatusCode();
         }
 
-        private void UploadFrames(string token)
+        private async Task<VideoManifest> LoadManifestAsync(string path, CancellationToken token)
         {
-            // Placeholder batch upload
-            for (int i = 0; i < 5; i++)
-            {
-                // simulate frame upload
-            }
+            var json = await File.ReadAllTextAsync(path, token);
+            return JsonSerializer.Deserialize<VideoManifest>(json) ?? throw new InvalidDataException("Invalid manifest file.");
         }
+    }
 
-        private string FinaliseUpload(string token)
-        {
-            // Placeholder server confirmation
-            return Guid.NewGuid().ToString();
-        }
+    public class UploadSessionResponse
+    {
+        public string Token { get; set; } = string.Empty;
     }
 }
