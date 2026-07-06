@@ -196,6 +196,16 @@ body::after {
     margin-bottom: 1rem;
 }
 
+.onboarding-card .link {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.onboarding-card .link:hover {
+    color: #0056b3;
+}
+
 .onboarding-card input,
 .onboarding-card select {
 
