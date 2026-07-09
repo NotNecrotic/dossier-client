@@ -467,6 +467,10 @@ body::after {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-image: url(background.png);
+    background-size: 100%;
+    background-position: bottom;
+    background-repeat: no-repeat;
     min-height: 100vh;
     padding: 20px;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
