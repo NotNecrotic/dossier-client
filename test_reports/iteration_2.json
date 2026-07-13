@@ -1,0 +1,59 @@
+{
+  "summary": "Iteration 1 TitleBar crash regression is FIXED. Full previously-blocked test suite now green: backend 19/19 pytest passed (incl. new server_url normalisation tests) and frontend end-to-end flows all pass — onboarding wizard 3-step, 3-panel workspace, folder filter, video player + subtitle overlay + transcript, AI query hits opening player, settings sections, theme toggle (dark/light incl. bg #FAFAFA vs #09090B), all 6 accent swatches change --accent-500. No runtime error overlay ever appears, even when partial URLs like 'ollama.local' are entered.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Settings > Connection server URL text input",
+        "issue": "The <input> is controlled directly by settings.server_url and PUTs on EVERY keystroke. Because the backend normalises anything not matching http(s)://... to empty string, the field VISUALLY CLEARS after every character the user types. Practical impact: users cannot type a URL character-by-character in Settings — they must paste a complete https:// URL in one go. The onboarding wizard is unaffected because it uses local useState. Recommend either (a) debounce + only PUT on blur/enter, or (b) keep a local draft state and PUT the normalised value on commit.",
+        "affected_selectors": ["[data-testid=\"settings-server-url\"]", "[data-testid=\"settings-video-root\"]", "[data-testid=\"settings-server-key\"]"],
+        "priority": "MEDIUM"
+      }
+    ],
+    "design_issues": []
+  },
+  "passed": [
+    "Backend 19/19 pytest passed (health, settings incl. url normalisation for 'notaurl'/'d'/'ollama.local', accept http(s), files, videos, subtitles, ai/query)",
+    "TitleBar no longer crashes — app renders with body class 'theme-dark dark' and background rgb(9,9,11)",
+    "Onboarding overlay shown when onboarding_complete=false",
+    "Onboarding Step 0: theme dark/light toggle applies immediately (body class + bg); Emerald accent sets --accent-500 to #10B981",
+    "Onboarding Step 1 (server): validation gates Next; onboarding-test-server returns 'Reachable'",
+    "Onboarding Step 2 (video root): validation gates Finish; onboarding closes and settings persist",
+    "3-panel workspace: explorer-panel, main-panel, ai-panel all mount",
+    "Folder click filters video grid (f-root: 16 cards → f-hardware: 3 cards)",
+    "video-card-v-1 opens video-player with valid stream_url and metadata loads",
+    "player-transcript-toggle opens transcript sidebar with cues",
+    "AI query 'upgrading my PC' returns ai-hit-v-1 hit; clicking navigates to player",
+    "Settings page shows all 5 sections (connection, storage, processing, appearance, application)",
+    "Settings theme toggle switches body class theme-dark ↔ theme-light and bg between rgb(9,9,11) and rgb(250,250,250)",
+    "Settings accent swatches update --accent-500 (verified Ruby=#EF4444, Amber=#F59E0B)",
+    "Settings server test connection returns OK",
+    "Typing partial URL 'ollama.local' letter-by-letter into settings-server-url does NOT crash TitleBar or produce runtime error overlay (regression fix verified)",
+    "PUT /api/settings with 'notaurl', 'd', 'ollama.local' all normalised to '' and persisted"
+  ],
+  "critical_code_review_comments": [
+    "SettingsView.jsx TextInput debounce: sends PUT /api/settings on every keystroke. This hits the backend ~5-10x/sec while typing and causes the visible-empty-input bug for server_url. Add local draft state + onBlur/onEnter commit, or a 300ms debounce.",
+    "OnboardingModal.jsx applyTheme(t,a) triggers updateSettings on every swatch/theme click even before onboarding completes; harmless but noisy — could batch until finish.",
+    "TitleBar.jsx line 81-89 fix (IIFE + try/catch) is correct and defensive — good pattern.",
+    "server.py update_settings normalisation is minimal and correct; consider also validating cpu_limit (10-100), upload_limit_mbps, and frame_sampling ranges to avoid bad state."
+  ],
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "OPTIONAL (medium): fix Settings > Connection server URL text input so users can type character-by-character. Currently the controlled binding + immediate PUT + backend normalisation clears the input on every keystroke. Same pattern is used for settings-video-root and settings-server-key but only server_url is affected because only it is normalised — video-root and key don't clear because backend accepts any string.",
+    "OPTIONAL: apply Pydantic Field(ge=..., le=...) constraints to cpu_limit, upload_limit_mbps, frame_sampling."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "100% (all critical flows pass; 1 medium UX issue in Settings text input)"},
+  "seed_data_creation": "none — used existing seeded mongo data (16 videos, 9 folders)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Regression suite lives at /app/backend/tests/backend_test.py — covers health, settings CRUD + server_url normalisation, files/folders/videos, subtitles, ai/query, server/test. Rerun with `pytest /app/backend/tests/backend_test.py -v`. The one open issue is the SettingsView text input UX: fix would be adding a local draft/debounce in TextInput or SettingsView. Onboarding will re-appear whenever onboarding_complete is reset to false on backend."
+}

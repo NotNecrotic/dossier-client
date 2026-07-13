@@ -216,6 +216,12 @@ async def get_settings():
 @api_router.put("/settings", response_model=Settings)
 async def update_settings(patch: SettingsUpdate):
     updates = {k: v for k, v in patch.model_dump().items() if v is not None}
+    # Best-effort normalisation: reject partial URLs so the UI never crashes on `new URL(...)`.
+    if "server_url" in updates:
+        url = (updates["server_url"] or "").strip()
+        if url and not url.startswith(("http://", "https://")):
+            url = ""
+        updates["server_url"] = url
     if updates:
         await db.settings.update_one({}, {"$set": updates}, upsert=True)
     doc = await db.settings.find_one({}, {"_id": 0})

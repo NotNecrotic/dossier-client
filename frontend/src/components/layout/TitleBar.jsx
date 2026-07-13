@@ -78,7 +78,15 @@ const TitleBar = () => {
         <div className="hidden md:flex items-center gap-1.5" data-testid="server-status">
           <Zap className="h-3 w-3 text-muted" />
           <span className="max-w-[180px] truncate">
-            {settings?.server_url ? new URL(settings.server_url).host : "no server"}
+            {(() => {
+              const url = settings?.server_url;
+              if (!url) return "no server";
+              try {
+                return new URL(url).host || url;
+              } catch {
+                return url;
+              }
+            })()}
           </span>
         </div>
         <div className="hidden lg:flex items-center gap-1.5 text-muted">
