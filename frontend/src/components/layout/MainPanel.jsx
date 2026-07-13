@@ -47,14 +47,14 @@ const MainPanel = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-[4px] bg-surface px-2 py-1 border border-app w-56">
+          <div className="flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 border border-app w-60 transition-fast focus-within:border-strong focus-within:shadow-[0_0_0_3px_var(--accent-glow)]">
             <Search className="h-3 w-3 text-muted" />
             <input
               data-testid="video-search-input"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search title…"
-              className="w-full bg-transparent text-xs text-app placeholder:text-muted outline-none"
+              className="w-full bg-transparent text-xs text-app placeholder:text-muted outline-none caret-accent"
             />
             {q && (
               <button
@@ -67,13 +67,13 @@ const MainPanel = () => {
               </button>
             )}
           </div>
-          <div className="flex items-center rounded-[4px] border border-app bg-surface p-0.5">
+          <div className="flex items-center rounded-full border border-app bg-surface p-0.5">
             <button
               type="button"
               onClick={() => setView("grid")}
               data-testid="view-grid-btn"
               className={cx(
-                "rounded-[3px] p-1 transition-fast",
+                "rounded-full p-1.5 transition-fast",
                 view === "grid" ? "bg-surface-hover text-app" : "text-muted hover:text-app"
               )}
               title="Grid view"
@@ -85,7 +85,7 @@ const MainPanel = () => {
               onClick={() => setView("list")}
               data-testid="view-list-btn"
               className={cx(
-                "rounded-[3px] p-1 transition-fast",
+                "rounded-full p-1.5 transition-fast",
                 view === "list" ? "bg-surface-hover text-app" : "text-muted hover:text-app"
               )}
               title="List view"

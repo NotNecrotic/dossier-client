@@ -18,7 +18,7 @@ const VideoCard = ({ video }) => {
       type="button"
       data-testid={`video-card-${video.id}`}
       onClick={() => openVideoAt(video.id, 0)}
-      className="group relative flex flex-col overflow-hidden rounded-[6px] border border-app bg-surface text-left transition-fast hover:border-strong hover:bg-surface-hover"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-app bg-surface text-left transition-fast hover:border-strong hover:bg-surface-hover hover:-translate-y-0.5 hover:shadow-[0_8px_28px_var(--accent-glow)]"
     >
       <div className="relative aspect-video overflow-hidden bg-panel">
         <img

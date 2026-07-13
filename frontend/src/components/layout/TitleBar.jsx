@@ -4,14 +4,17 @@ import { useStore } from "@/lib/store";
 import { cx } from "@/lib/format";
 import DossierMark from "@/components/branding/DossierMark";
 
-const TitleBar = () => {
+const TitleBar = ({ transparent = false }) => {
   const { settings, engineStatus } = useStore();
   const location = useLocation();
   const onSettings = location.pathname.startsWith("/settings");
 
   return (
     <div
-      className="flex h-11 items-center justify-between border-b border-app bg-panel px-3 select-none"
+      className={cx(
+        "flex h-11 items-center justify-between px-3 select-none",
+        transparent ? "bg-transparent" : "border-b border-app bg-panel"
+      )}
       data-testid="app-titlebar"
     >
       <div className="flex items-center gap-3">
@@ -25,16 +28,19 @@ const TitleBar = () => {
           </span>
         </Link>
         <div className="mx-2 h-4 w-px bg-app" />
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-1 rounded-full border border-app bg-panel/60 p-1 backdrop-blur">
           <Link
             to="/"
             data-testid="nav-home-btn"
             className={cx(
-              "flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-xs transition-fast",
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-fast",
               location.pathname === "/"
-                ? "bg-surface text-app border border-app"
-                : "text-2nd hover:text-app hover:bg-surface-hover border border-transparent"
+                ? "bg-surface text-app"
+                : "text-2nd hover:text-app hover:bg-surface-hover"
             )}
+            style={
+              location.pathname === "/" ? { boxShadow: "0 0 12px var(--accent-glow)" } : undefined
+            }
           >
             <Home className="h-3.5 w-3.5" />
             Home
@@ -43,11 +49,16 @@ const TitleBar = () => {
             to="/workspace"
             data-testid="nav-workspace"
             className={cx(
-              "flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-xs transition-fast",
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-fast",
               location.pathname.startsWith("/workspace")
-                ? "bg-surface text-app border border-app"
-                : "text-2nd hover:text-app hover:bg-surface-hover border border-transparent"
+                ? "bg-surface text-app"
+                : "text-2nd hover:text-app hover:bg-surface-hover"
             )}
+            style={
+              location.pathname.startsWith("/workspace")
+                ? { boxShadow: "0 0 12px var(--accent-glow)" }
+                : undefined
+            }
           >
             <FolderOpen className="h-3.5 w-3.5" />
             Workspace
@@ -56,11 +67,10 @@ const TitleBar = () => {
             to="/settings"
             data-testid="nav-settings"
             className={cx(
-              "flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-xs transition-fast",
-              onSettings
-                ? "bg-surface text-app border border-app"
-                : "text-2nd hover:text-app hover:bg-surface-hover border border-transparent"
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-fast",
+              onSettings ? "bg-surface text-app" : "text-2nd hover:text-app hover:bg-surface-hover"
             )}
+            style={onSettings ? { boxShadow: "0 0 12px var(--accent-glow)" } : undefined}
           >
             <SettingsIcon className="h-3.5 w-3.5" />
             Settings

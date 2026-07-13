@@ -90,9 +90,9 @@ const AIPanel = () => {
                         key={k}
                         onClick={() => openVideoAt(h.video_id, h.timestamp)}
                         data-testid={`ai-hit-${h.video_id}`}
-                        className="group flex w-full items-center gap-2 rounded-[4px] border border-app bg-surface px-2 py-1.5 text-left transition-fast hover:border-strong hover:bg-surface-hover"
+                        className="group flex w-full items-center gap-2 rounded-full border border-app bg-surface px-3 py-1.5 text-left transition-fast hover:border-strong hover:bg-surface-hover hover:shadow-[0_0_0_3px_var(--accent-glow)]"
                       >
-                        <span className="rounded-[3px] accent-bg-soft accent-text px-1.5 py-0.5 font-mono text-[10px]">
+                        <span className="rounded-full accent-bg-soft accent-text px-2 py-0.5 font-mono text-[10px]">
                           {formatDuration(h.timestamp)}
                         </span>
                         <span className="flex-1 truncate text-xs text-app">
@@ -127,7 +127,7 @@ const AIPanel = () => {
                 type="button"
                 onClick={() => submit(s)}
                 data-testid={`ai-suggestion-${s.slice(0, 10)}`}
-                className="rounded-[4px] border border-app bg-surface px-2 py-1 text-[11px] text-2nd transition-fast hover:border-strong hover:text-app"
+                className="rounded-full border border-app bg-surface px-3 py-1 text-[11px] text-2nd transition-fast hover:border-strong hover:text-app hover:shadow-[0_0_0_3px_var(--accent-glow)]"
               >
                 {s}
               </button>
@@ -143,10 +143,8 @@ const AIPanel = () => {
         }}
         className="border-t border-app p-3"
       >
-        <div className={cx(
-          "flex items-center gap-2 rounded-[6px] border bg-surface px-3 py-2 transition-fast",
-          "border-app focus-within:border-strong focus-within:accent-border"
-        )}>
+        <div className="flex items-center gap-2 rounded-full border border-app bg-surface pl-4 pr-1.5 py-1.5 transition-fast focus-within:border-strong focus-within:shadow-[0_0_0_4px_var(--accent-glow)]">
+          <Sparkles className="h-3.5 w-3.5 flex-shrink-0 accent-text opacity-70" />
           <input
             data-testid="ai-input"
             value={input}
@@ -159,18 +157,32 @@ const AIPanel = () => {
             data-testid="ai-send-btn"
             disabled={!input.trim() || mutation.isPending}
             className={cx(
-              "flex h-7 w-7 items-center justify-center rounded-[4px] transition-fast",
+              "flex h-8 w-8 items-center justify-center rounded-full transition-fast",
               input.trim() && !mutation.isPending
                 ? "accent-bg text-black hover:opacity-90"
                 : "bg-surface-hover text-muted"
             )}
+            style={
+              input.trim() && !mutation.isPending
+                ? { boxShadow: "0 0 16px var(--accent-glow)" }
+                : undefined
+            }
           >
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="mt-1.5 flex items-center justify-between font-mono text-[10px] text-muted">
+        <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-muted">
           <span>Enter to send</span>
-          <span>{settings?.server_url ? "Connected" : "Offline mode"}</span>
+          <span className="flex items-center gap-1">
+            <span
+              className="h-1 w-1 rounded-full"
+              style={{
+                backgroundColor: settings?.server_url ? "var(--accent-500)" : "var(--text-muted)",
+                boxShadow: settings?.server_url ? "0 0 6px var(--accent-500)" : "none",
+              }}
+            />
+            {settings?.server_url ? "Connected" : "Offline mode"}
+          </span>
         </div>
       </form>
     </div>
