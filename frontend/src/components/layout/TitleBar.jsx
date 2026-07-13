@@ -1,17 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Settings as SettingsIcon, FolderOpen, Cpu, Zap, Circle } from "lucide-react";
+import { Settings as SettingsIcon, FolderOpen, Cpu, Zap, Circle, Home } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { cx } from "@/lib/format";
-
-const DossierMark = () => (
-  <div className="flex h-6 w-6 items-center justify-center rounded-[4px] border border-app bg-surface">
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <path d="M5 4v16M5 4h9l4 4v12H5" strokeLinejoin="round" />
-      <path d="M14 4v4h4" />
-      <circle cx="12" cy="14" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
-  </div>
-);
+import DossierMark from "@/components/branding/DossierMark";
 
 const TitleBar = () => {
   const { settings, engineStatus } = useStore();
@@ -24,21 +15,36 @@ const TitleBar = () => {
       data-testid="app-titlebar"
     >
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 accent-text">
-          <DossierMark />
-          <span className="font-heading text-sm font-bold tracking-wide text-app">Dossier</span>
+        <Link to="/" data-testid="nav-home" className="flex items-center gap-2">
+          <DossierMark size={22} />
+          <span className="font-heading text-sm font-bold tracking-[0.14em] text-app">
+            DOSSIER
+          </span>
           <span className="hidden sm:inline font-mono text-[10px] uppercase tracking-widest text-muted">
             v1.0
           </span>
-        </div>
+        </Link>
         <div className="mx-2 h-4 w-px bg-app" />
         <nav className="flex items-center gap-1">
           <Link
             to="/"
+            data-testid="nav-home-btn"
+            className={cx(
+              "flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-xs transition-fast",
+              location.pathname === "/"
+                ? "bg-surface text-app border border-app"
+                : "text-2nd hover:text-app hover:bg-surface-hover border border-transparent"
+            )}
+          >
+            <Home className="h-3.5 w-3.5" />
+            Home
+          </Link>
+          <Link
+            to="/workspace"
             data-testid="nav-workspace"
             className={cx(
               "flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-xs transition-fast",
-              !onSettings
+              location.pathname.startsWith("/workspace")
                 ? "bg-surface text-app border border-app"
                 : "text-2nd hover:text-app hover:bg-surface-hover border border-transparent"
             )}

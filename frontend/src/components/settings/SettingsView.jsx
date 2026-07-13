@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useStore, ACCENTS } from "@/lib/store";
 import { serverApi } from "@/lib/api";
@@ -41,19 +41,32 @@ const Row = ({ title, description, children }) => (
   </div>
 );
 
-const TextInput = ({ value, onChange, placeholder, testid, type = "text", mono = false }) => (
-  <input
-    data-testid={testid}
-    type={type}
-    value={value ?? ""}
-    onChange={(e) => onChange(e.target.value)}
-    placeholder={placeholder}
-    className={cx(
-      "w-72 rounded-[4px] border border-app bg-surface px-3 py-1.5 text-sm text-app outline-none transition-fast placeholder:text-muted focus:border-strong focus:accent-border caret-accent",
-      mono && "font-mono"
-    )}
-  />
-);
+const TextInput = ({ value, onCommit, placeholder, testid, type = "text", mono = false }) => {
+  const [draft, setDraft] = useState(value ?? "");
+  // Keep local draft in sync when the source-of-truth changes externally
+  useEffect(() => {
+    setDraft(value ?? "");
+  }, [value]);
+  return (
+    <input
+      data-testid={testid}
+      type={type}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        if (draft !== (value ?? "")) onCommit(draft);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.currentTarget.blur();
+      }}
+      placeholder={placeholder}
+      className={cx(
+        "w-72 rounded-[4px] border border-app bg-surface px-3 py-1.5 text-sm text-app outline-none transition-fast placeholder:text-muted focus:border-strong focus:accent-border caret-accent",
+        mono && "font-mono"
+      )}
+    />
+  );
+};
 
 const Slider = ({ value, onChange, min, max, step = 1, unit = "", testid }) => (
   <div className="flex items-center gap-3">
@@ -143,7 +156,7 @@ const SettingsView = () => {
           <TextInput
             testid="settings-server-url"
             value={settings.server_url}
-            onChange={(v) => set({ server_url: v })}
+            onCommit={(v) => set({ server_url: v })}
             placeholder="https://ollama.local:11434"
             mono
           />
@@ -154,7 +167,7 @@ const SettingsView = () => {
             <TextInput
               testid="settings-server-key"
               value={settings.server_key}
-              onChange={(v) => set({ server_key: v })}
+              onCommit={(v) => set({ server_key: v })}
               placeholder="sk-•••"
               type="password"
               mono
@@ -198,7 +211,7 @@ const SettingsView = () => {
           <TextInput
             testid="settings-video-root"
             value={settings.video_root}
-            onChange={(v) => set({ video_root: v })}
+            onCommit={(v) => set({ video_root: v })}
             placeholder="/Users/you/Videos"
             mono
           />

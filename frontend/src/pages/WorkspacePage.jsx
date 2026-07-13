@@ -35,7 +35,17 @@ const WorkspacePage = () => {
   const { explorerOpen, aiOpen, setExplorerOpen, setAiOpen } = useStore();
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-app">
+    <div className="relative flex h-screen w-screen flex-col bg-app">
+      {/* Ambient corner glow — carries the home hero identity in here */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(24% 18% at 100% 0%, var(--accent-glow) 0%, transparent 70%), radial-gradient(18% 14% at 0% 100%, var(--accent-glow) 0%, transparent 70%)",
+        }}
+      />
+      <div className="relative z-10 flex flex-1 flex-col">
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         {!explorerOpen && (
@@ -77,6 +87,7 @@ const WorkspacePage = () => {
             testId="ai-open-strip"
           />
         )}
+      </div>
       </div>
     </div>
   );

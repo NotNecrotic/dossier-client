@@ -46,7 +46,7 @@ class Settings(BaseModel):
 
     onboarding_complete: bool = False
     theme: Literal["dark", "light"] = "dark"
-    accent: str = "Sapphire"
+    accent: str = "Amethyst"
     server_url: str = ""
     server_key: str = ""
     video_root: str = ""
