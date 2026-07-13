@@ -1,0 +1,182 @@
+{
+  "app_identity": {
+    "name": "Dossier",
+    "description": "AI-powered video indexing and retrieval application",
+    "type": "Desktop-class App (Hybrid Fullstack Web)",
+    "vibe": "Professional, precise, technical yet artistic. A command center for video archives.",
+    "logo_concept": "A sharp, minimalist geometric 'D' that subtly resembles a play button or timeline marker, using the active accent color."
+  },
+  "theme_strategy": {
+    "default_mode": "dark",
+    "supported_modes": ["dark", "light"],
+    "accent_colors": [
+      { "name": "Sapphire", "value": "#3B82F6", "css_var": "--accent" },
+      { "name": "Amethyst", "value": "#8B5CF6", "css_var": "--accent" },
+      { "name": "Emerald", "value": "#10B981", "css_var": "--accent" },
+      { "name": "Ruby", "value": "#EF4444", "css_var": "--accent" },
+      { "name": "Amber", "value": "#F59E0B", "css_var": "--accent" },
+      { "name": "Slate", "value": "#64748B", "css_var": "--accent" }
+    ]
+  },
+  "colors": {
+    "dark": {
+      "background": "#09090B",
+      "panel_bg": "#141417",
+      "surface": "#1E1E22",
+      "surface_hover": "#27272A",
+      "border": "#27272A",
+      "text_primary": "#FAFAFA",
+      "text_secondary": "#A1A1AA",
+      "text_muted": "#71717A",
+      "status_processing": "#F59E0B",
+      "status_completed": "#10B981",
+      "status_error": "#EF4444",
+      "status_unprocessed": "#52525B"
+    },
+    "light": {
+      "background": "#FAFAFA",
+      "panel_bg": "#F4F4F5",
+      "surface": "#FFFFFF",
+      "surface_hover": "#F4F4F5",
+      "border": "#E4E4E7",
+      "text_primary": "#09090B",
+      "text_secondary": "#52525B",
+      "text_muted": "#A1A1AA",
+      "status_processing": "#F59E0B",
+      "status_completed": "#10B981",
+      "status_error": "#EF4444",
+      "status_unprocessed": "#A1A1AA"
+    },
+    "rules": [
+      "No full-screen gradients. The application relies on solid colors, sharp borders, and distinct panel separations.",
+      "Use the selected accent color exclusively for primary actions, active states, and AI jump markers.",
+      "Surfaces must have a 1px solid border matching the theme's border color."
+    ]
+  },
+  "typography": {
+    "headings": {
+      "family": "Chivo, sans-serif",
+      "weights": ["400", "600", "700"],
+      "usage": "Main application headers, panel titles, empty state headings."
+    },
+    "body": {
+      "family": "'IBM Plex Sans', sans-serif",
+      "weights": ["400", "500", "600"],
+      "usage": "UI text, dense settings, folder tree items, general metadata."
+    },
+    "monospace": {
+      "family": "'JetBrains Mono', monospace",
+      "weights": ["400", "500"],
+      "usage": "Timestamps, AI generated jump markers, file paths, specific code/query chunks."
+    }
+  },
+  "layouts": {
+    "main_workspace": {
+      "type": "3-panel resizable layout (using react-resizable-panels)",
+      "structure": [
+        { "name": "Left Panel (Explorer)", "default_width": "20%", "min_width": "15%", "collapsible": true },
+        { "name": "Center Panel (Main Workspace)", "default_width": "55%", "min_width": "40%" },
+        { "name": "Right Panel (AI Assistant)", "default_width": "25%", "min_width": "20%", "collapsible": true }
+      ],
+      "rules": [
+        "Include a top titlebar/toolbar area spanning the full width (like native apps).",
+        "Panels must be separated by 1px draggable borders.",
+        "When a panel is collapsed, show a thin vertical strip with a toggle icon to reopen it."
+      ]
+    },
+    "video_grid": {
+      "type": "Dense CSS Grid",
+      "classes": "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 p-4",
+      "rules": "Must fill the Center Panel area and support scrolling independently."
+    }
+  },
+  "components": {
+    "explorer_tree": {
+      "structure": "Nested unordered list",
+      "visuals": "Small padding (py-1 px-2), text-sm. Folder icons toggle between open/closed states. Chevrons on the left.",
+      "interactions": "Hover state highlights the row. Active state applies a subtle background tint and left border in accent color.",
+      "status_indicators": "Videos in the tree have a 6px circular dot indicator (Yellow=processing, Green=completed, Red=error, Gray=unprocessed) next to the filename."
+    },
+    "video_card": {
+      "structure": "Thumbnail top, metadata bottom",
+      "visuals": "Sharp or slightly rounded corners (max 6px). 1px border. No heavy drop shadow (use inner borders or subtle ambient shadow).",
+      "thumbnail": "Aspect ratio 16:9, relative container, overlay with duration badge in bottom right (bg-black/80 font-mono text-xs).",
+      "metadata": "Title truncated to 1 line, Date/Size in text-xs text-secondary.",
+      "hover_state": "Slight brightness increase on thumbnail. A centered 'Play' button overlay fades in over the thumbnail."
+    },
+    "video_player": {
+      "structure": "Native-feeling custom HTML5 wrapper",
+      "visuals": "Fills the center workspace. Control bar at the bottom with solid dark background.",
+      "timeline": "Custom timeline track. Must render 'AI Jump Markers' as vertical 2px bars along the track using the active accent color.",
+      "subtitles": "Overlay on video. Text must be white, font-bold, with heavy text-shadow or a translucent black background strip for legibility.",
+      "controls": "Play/Pause, Skip Back/Forward, Volume, Fullscreen, and a 'View Transcript' toggle."
+    },
+    "ai_chat_bubble": {
+      "structure": "Standard chat feed, bottom input",
+      "user_bubble": "Aligned right. Background surface color, text-primary.",
+      "ai_bubble": "Aligned left. No background, transparent, but has a 2px left-border in the accent color.",
+      "timestamp_links": "Rendered within AI text as inline block tags. Font-mono, text-xs, text-accent, bg-accent/10, px-1 rounded. Hoverable and clickable."
+    },
+    "onboarding_modal": {
+      "structure": "Multi-step wizard overlay",
+      "visuals": "Fixed center screen. Background is a heavy glassmorphic blur (backdrop-blur-xl bg-black/40). The modal itself is solid surface color, sharp borders.",
+      "steps": "1. Welcome & Theme Selection (Skippable), 2. Server URL & Key (Required), 3. Video Root Folder (Required).",
+      "controls": "Next/Back buttons in footer. 'Skip' where applicable."
+    },
+    "settings_row": {
+      "structure": "Flex container, justify-between, items-center, border-b border-border py-4",
+      "left": "Title and description block (flex-col).",
+      "right": "Control component (Switch, Select, Input, Color Swatches)."
+    }
+  },
+  "visual_enhancers": {
+    "shadows": "Minimal. Rely on 1px borders for structural separation. Only use heavy shadows for modals/dialogs.",
+    "borders": "Sharp edges or minimal radii (4px to 6px maximum) to maintain the 'desktop app' feel.",
+    "icons": "Use Phosphor Icons (technical, clean).",
+    "glassmorphism": "Used ONLY for overlay modals (onboarding, dialogs) to obscure the background. NEVER use transparent backgrounds for dropdowns or panels."
+  },
+  "motion": {
+    "panel_resize": "Smooth dragging, snap to minimum widths.",
+    "hover_states": "Fast transitions (150ms). Focus on opacity and subtle background color shifts.",
+    "dialogs": "Scale up slightly (0.95 to 1) and fade in (opacity 0 to 1) over 200ms."
+  },
+  "accessibility": {
+    "guidelines": [
+      "All interactive elements MUST include a data-testid attribute.",
+      "Ensure color contrast is maintained, especially for AI jump markers on the timeline.",
+      "Keyboard shortcuts should be visually hinted in menus or tooltips (e.g., Cmd+P)."
+    ]
+  },
+  "image_urls": {
+    "video_thumbnails": [
+      {
+        "url": "https://images.unsplash.com/photo-1477346611705-65d1883cee1e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHxjaW5lbWF0aWMlMjBsYW5kc2NhcGV8ZW58MHx8fHwxNzgzOTMxMTcwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Aerial photo of brown mountains (mock video 1)"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1485470733090-0aae1788d5af?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxjaW5lbWF0aWMlMjBsYW5kc2NhcGV8ZW58MHx8fHwxNzgzOTMxMTcwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Silhouette of mountains during night (mock video 2)"
+      }
+    ]
+  },
+  "instructions_to_main_agent": {
+    "rules": [
+      "Build a Single Page App simulating a desktop application. Do not build a scrolling marketing page.",
+      "Implement the 3-panel layout using react-resizable-panels.",
+      "Do not use default generic fonts like Inter or Roboto. Integrate Chivo, IBM Plex Sans, and JetBrains Mono.",
+      "Apply the theme variable strategy to allow switching between the 6 accent colors dynamically via CSS variables.",
+      "Never use full transparent backgrounds where content overlap can occur.",
+      "Add data-testid attributes (kebab-case, role-based) to all buttons, inputs, tabs, and interactive elements.",
+      "Use Lucide-react or Phosphor Icons for the iconography.",
+      "For tooltips and toasts, use Shadcn/Sonner."
+    ]
+  },
+  "universal_guidelines_for_main_agent": [
+    "You tend to converge toward generic outputs. Avoid 'AI slop'. Make it feel like a professional tool like VS Code or DaVinci Resolve, but uniquely Dossier.",
+    "Do NOT use dark colors as gradients.",
+    "Do not center-align the app container (.App { text-align: center; } is forbidden).",
+    "Never use AI assistant emoji characters (🤖, 🧠) for icons. Use clean SVG icons.",
+    "Every interaction needs micro-animations - hover states, transitions. Exclude transform from 'all' transitions.",
+    "Ensure the UI feels dense enough for productivity but clean and well-structured."
+  ]
+}
