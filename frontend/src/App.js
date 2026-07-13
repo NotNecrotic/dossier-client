@@ -1,54 +1,52 @@
-import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { StoreProvider, useStore } from "@/lib/store";
+import WorkspacePage from "@/pages/WorkspacePage";
+import SettingsPage from "@/pages/SettingsPage";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import EngineOfflineOverlay from "@/components/layout/EngineOfflineOverlay";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const Shell = () => {
+  const { settings, engineStatus } = useStore();
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+  if (engineStatus === "checking" && !settings) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-app">
+        <div className="flex items-center gap-3 text-2nd">
+          <span className="h-2 w-2 rounded-full accent-bg dossier-pulse" />
+          <span className="font-mono text-xs uppercase tracking-widest">
+            Connecting to Dossier engine…
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <>
+      {engineStatus === "offline" && <EngineOfflineOverlay />}
+      <Routes>
+        <Route path="/" element={<WorkspacePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      {settings && !settings.onboarding_complete && engineStatus === "online" && (
+        <OnboardingModal />
+      )}
+      <Toaster position="bottom-right" theme="dark" />
+    </>
   );
 };
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <StoreProvider>
+        <BrowserRouter>
+          <Shell />
+        </BrowserRouter>
+      </StoreProvider>
     </div>
   );
 }

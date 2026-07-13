@@ -1,0 +1,31 @@
+{
+  "summary": "Backend endpoints all working (200s, correct payloads). Frontend is BLOCKED by a runtime crash in TitleBar.jsx that unmounts the entire workspace: `new URL(settings.server_url).host` throws when server_url is not a valid URL (backend currently returns server_url='d'). This prevents Explorer, Main, AI, Settings, and Player from rendering at all.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "GET /api/health returns {status:'ok', engine:'dossier-mock'} (200)",
+    "GET /api/settings returns full settings object (200)",
+    "GET /api/files/folders returns nested folder list with f-root, f-vlogs, etc. (200)",
+    "GET /api/files/videos returns seeded videos incl. v-1 'PC Upgrade — GPU + Cooling' (200)",
+    "GET /api/video/v-1 returns video with stream_url (200)",
+    "GET /api/video/v-1/subtitles returns cue list (200)",
+    "POST /api/server/test with 'https://ollama.local:11434' returns {ok:true, latency_ms:214} (200)",
+    "POST /api/ai/query for 'upgrading my PC' returns hits from v-1 and v-3 with timestamps (200)",
+    "Frontend document loads, dark theme body class applied (theme-dark, bg rgb(9,9,11))"
+  ],
+  "failed": [
+    {
+      "area": "Frontend - TitleBar.jsx",
+      "issue": "Uncaught runtime error: TypeError: Failed to construct 'URL': Invalid URL. Line 81 executes `new URL(settings.server_url).host` unconditionally when server_url is truthy but not a valid absolute URL. Backend currently returns server_url='d' (a single character), causing the entire React tree to unmount. As a result NONE of the workspace panels (explorer-panel, main-panel, ai-panel), no video cards, no folder nodes, no settings-view, no player render. Every downstream frontend test in this iteration is blocked by this single defect.",
+      "evidence": "Screenshot shows Uncaught runtime errors overlay with stack at TitleBar. Selectors [data-testid='explorer-panel'], [data-testid='main-panel'], [data-testid='ai-panel'], [data-testid='ai-input'], [data-testid='settings-view'] all MISSING. Body still gets theme-dark class from StoreProvider but page content is empty.",
+      "priority": "HIGH"
+    }
+  ],
+  "action_items": [
+    "Fix TitleBar.jsx line 81 to safely handle invalid/partial URLs. Suggested: wrap in try/catch or use a helper: `const host = (() => { try { return new URL(settings.server_url).host; } catch { return settings.server_url || 'no server'; } })();`",
+    "Optionally also validate/normalize server_url on the backend PUT /api/settings so a value like 'd' cannot be persisted, or auto-strip to empty string when it doesn't match http(s)://host.",
+    "Once fixed, re-run: workspace 3-panel render, folder tree click filters videos, video card opens player with valid <video src>, AI query returns clickable ai-hit-v-1 that seeks player, settings theme/accent toggle, settings-test-server."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "0% (blocked by TitleBar crash)"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}
