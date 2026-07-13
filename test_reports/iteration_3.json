@@ -1,0 +1,48 @@
+{
+  "summary": "Iteration 3 retest after HomePage was added at '/' and workspace moved to '/workspace'. ALL requested flows pass. Backend 19/19 pytest green (incl. server_url normalisation for 'notaurl'/'d'/'ollama.local'). Frontend: HomePage hero renders with THE DOSSIER wordmark + purple DossierMark + glowy search + Explore Workspace pill + gear; onboarding 3-step wizard gates a fresh user and closes on Finish; home search 'upgrading my PC' calls /api/ai/query and navigates to /workspace with the player opened at v-1 timestamp; 3-panel workspace (explorer, main, ai) renders; folder click filters cards (f-hardware => 3); video-card-v-1 opens video-player with valid stream_url; player transcript toggle + close work; AI query returns ai-hit-v-1 that opens the player; Settings has all sections, theme dark<->light toggles body class, all 6 accent swatches present, Ruby applies #EF4444, Amethyst applies #8B5CF6, Test connection succeeds. TitleBar no longer crashes with invalid server_url (verified by setting server_url='d' via PUT then reloading — HomePage still renders, no runtime error overlay). Zero console/page errors across /, /workspace, /settings and 404->/. Default accent from GET /api/settings on a fresh install is 'Amethyst' (verified after clearing settings collection).",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed": [
+    "Backend 19/19 pytest: health, settings shape, url normalisation ('notaurl','d','ollama.local' -> ''), accept http/https, theme+accent PUT, /server/test valid+invalid, folders shape, videos all + filter by folder, single video, 404 on missing video, subtitles cues, /ai/query for 'upgrading my PC' returns v-1, empty query returns [], no-match query handled",
+    "GET /api/settings on fresh install returns default accent 'Amethyst' and onboarding_complete=false",
+    "HomePage renders with data-testids home-title, home-search-input, home-search-btn, home-explore-btn, home-settings-btn — 'THE DOSSIER' wordmark visible, purple ambient glows, Amethyst accent applied",
+    "Onboarding overlay shows when onboarding_complete=false; 3 steps; Next disabled on step 2 without server URL; Next disabled on step 3 without video root; Finish closes modal and persists settings",
+    "--accent-500 = #8B5CF6 after selecting Amethyst; #EF4444 after Ruby",
+    "Home search flow: typing 'upgrading my PC' + clicking home-search-btn calls /api/ai/query, navigates to /workspace, and opens video-player with src=BigBuckBunny.mp4 (v-1) — verified via <video src>",
+    "3-panel workspace: explorer-panel + main-panel + ai-panel all mount when no video selected",
+    "Explorer: 6 non-root folder nodes render; clicking f-hardware filters cards from 16 -> 3",
+    "video-card-v-1 opens video-player, player-transcript-toggle toggles transcript, player-close restores main-panel",
+    "AI panel: typing 'Where did I talk about upgrading my PC?' + submit renders ai-hit-v-1; clicking it opens the player",
+    "TitleBar (present in /workspace and /settings) renders nav-home-btn, nav-workspace, nav-settings, engine-status='ENGINE', server-status='ollama.local:11434'; navigation between all three routes works",
+    "SettingsPage renders settings-view with Connection / Storage / Processing / Appearance / Application sections; all 6 accent swatches (sapphire, amethyst, emerald, ruby, amber, slate) present; Test connection returns 'Handshake successful'; theme toggle switches body class theme-dark <-> theme-light",
+    "TitleBar crash fix (HIGH-priority from iteration 1) VERIFIED: PUT /api/settings server_url='d' persists as '' due to backend normalisation, and even if a raw invalid URL were present, TitleBar wraps new URL(...) in try/catch and falls back to the raw string. Reloading the app after setting an invalid URL renders HomePage cleanly with zero runtime errors.",
+    "Cross-nav: HomePage's home-explore-btn -> /workspace; home-settings-btn -> /settings; TitleBar nav-home-btn on /workspace/settings -> /; unknown routes redirect to /",
+    "Zero console errors and zero page errors across all tested routes"
+  ],
+  "critical_code_review_comments": [
+    "HomePage does NOT mount the TitleBar — this is intentional for the hero landing look, but review request mentions 'Title bar Home / Workspace / Settings links all work'. Cross-nav still works because HomePage has home-explore-btn + home-settings-btn, and TitleBar is present on both /workspace and /settings. Not a bug, just a design choice worth confirming.",
+    "MainPanel.jsx switches between the video grid (data-testid=main-panel) and VideoPlayer (data-testid=video-player) based on selectedVideoId — so 'main-panel' is not queryable while a video is open. The review request expected all three panels visible; the current behaviour is correct product design (player replaces the grid inside the middle panel) — worth noting for future testers.",
+    "SettingsView.jsx TextInput debounce issue (raised in iteration 2 and still present per code review of SettingsView.jsx): controlled inputs for server_url PUT on every keystroke and the backend normaliser clears anything without http(s):// — so typing a URL character-by-character in Settings visibly clears. Workaround: paste a full URL. Recommend a local draft state with onBlur/Enter commit or a 300ms debounce.",
+    "Backend server.py update_settings does not validate cpu_limit (10-100), upload_limit_mbps, or frame_sampling ranges — Pydantic Field(ge=, le=) would harden this."
+  ],
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "OPTIONAL (medium): fix Settings > server URL text input debounce so users can type character-by-character (carried over from iteration 2).",
+    "OPTIONAL: consider showing the TitleBar on HomePage too, or leave as-is if the hero landing look is the intended design.",
+    "OPTIONAL: harden server.py update_settings with Pydantic range validators on cpu_limit / upload_limit_mbps / frame_sampling."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100% (all requested flows pass; one carried-over medium UX issue in Settings text input)"},
+  "seed_data_creation": "Cleared the mongo `settings` collection once at the start so onboarding_complete=false + default accent=Amethyst could be verified. Seed folders (9) and videos (16) untouched.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Regression suite at /app/backend/tests/backend_test.py (19 tests) covers all endpoints incl. url normalisation. Frontend flows are stable: HomePage hero, onboarding gating, home search -> workspace player, 3-panel workspace, folder filter, video player + transcript, AI query hits, Settings sections + theme + accent, TitleBar crash-safe. The only known open issue is the Settings server-URL text input character-clearing UX (iteration 2 carryover). To trigger onboarding again, clear the mongo settings collection or PUT {onboarding_complete:false}."
+}
