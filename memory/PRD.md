@@ -1,89 +1,60 @@
-# Dossier — Product Requirements Document
+# Dossier — Frontend Client
 
-## Original problem statement
-Build the complete frontend client for **Dossier**, an AI-powered video
-indexing and retrieval application. The client is a desktop-class app that
-lets users manage a large personal video library, process videos through an
-AI backend, and search their video history in natural language.
+## Original Problem Statement
+Build a complete desktop-class client for **Dossier** — an AI-powered video indexing and retrieval application. The client browses a large personal video library, delegates AI workloads to a remote processing server (Ollama-compatible), and lets the user search their video history in natural language. Reference feel: Visual Studio Code / DaVinci Resolve / Unreal Engine editor. Must NOT process videos, scan files, store credentials insecurely, or contain business logic — that all lives in the local C# engine (mocked here as FastAPI).
 
-Because the sandbox is React + FastAPI + MongoDB (web), the C# engine is
-represented by a **FastAPI mock engine** exposing the same API surface. The
-frontend contains **no business logic** — it only presents data and forwards
-commands to the engine.
+## User Choices (verbatim)
+- "dark theme by default with a toggle for light. also an option to change the accent color."
+- "lets focus more on modern ui than a specific software like vscode or resolve. it needs to be unique feel."
+- "the app pulls videos from the users computer starting from the root directory (set in settings)"
+- AI eventually connects to user's own Ollama cloud LLM
+- Onboarding: multi-step, **server URL required**, **video folder required**, theme step skippable
+- Second-pass direction: purple/violet aesthetic with a hero landing page ("THE DOSSIER" wordmark, glowy search input, Explore Workspace pill button)
 
-## User personas
-- **Content creator / archivist** – large personal library (hundreds to
-  thousands of videos) they want to search by natural language.
-- **Prosumer / developer** – runs their own processing server (Ollama /
-  self-hosted) and wants total control over storage & credentials.
-- **Tool-oriented power user** – expects VS Code / Resolve level polish,
-  keyboard-friendly, dense, dark.
+## Architecture
+- **Frontend** — React 19 + Tailwind + shadcn/ui + `@tanstack/react-query` + `react-resizable-panels`. Purple `Amethyst` accent default, dark theme, six user-selectable accents (Sapphire / Amethyst / Emerald / Ruby / Amber / Slate).
+- **Backend** — FastAPI mock of the local C# engine, MongoDB for settings + seeded folders/videos.
+- **Routes** — `/` = HomePage (hero landing), `/workspace` = 3-panel workspace, `/settings` = Settings.
+- **API layer** — centralised in `/app/frontend/src/lib/api.js` (settingsApi / filesApi / videoApi / aiApi / serverApi / engineApi). No API calls scattered in UI.
+- **Store** — `StoreProvider` context in `lib/store.jsx` manages settings, theme/accent CSS vars, selected folder/video, panel collapse state, and video seek target.
 
-## Core requirements (static)
-- Desktop-class 3-panel layout: Explorer / Main / AI Assistant.
-- Multi-step onboarding: theme (skippable), server URL + key (required),
-  video root folder (required).
-- Settings view: Connection, Storage, Processing, Appearance, Application.
-- Video library browsing (grid + list), status indicators, AI jump markers
-  on player timeline, subtitle overlay, transcript panel.
-- Frontend never processes videos, scans filesystems, or handles AI
-  workloads — everything goes through `/api/*`.
-- Dark by default + light theme + 6 accent colour options.
+## Implemented (2026-02)
+### Backend endpoints (all `/api`)
+- `GET /health` · `GET /settings` · `PUT /settings` (validates & normalises server_url)
+- `POST /server/test` (mock reachability)
+- `GET /files/folders` (with recursive video counts) · `GET /files/videos?folder_id&q`
+- `GET /video/{id}` · `GET /video/{id}/subtitles` (generated cues)
+- `POST /ai/query` (deterministic keyword search — Ollama swappable behind this route)
+- Seeded 9 folders + 16 videos referencing public sample MP4s.
 
-## Architecture chosen
-- **Frontend**: React 19 + Tailwind + shadcn/ui, `react-resizable-panels`,
-  React Router 7, React Query for server state, Context for UI/theme state.
-- **Backend (mock C# engine)**: FastAPI + Motor/MongoDB, seeded on startup
-  with 9 folders / 16 videos / default settings.
-- **Design tokens**: CSS variables scoped by `.theme-dark` / `.theme-light`
-  on `<body>`. Accent colours set six `--accent-*` variables dynamically.
-- **Typography**: Chivo (headings), IBM Plex Sans (body), JetBrains Mono
-  (numbers, timestamps, paths) via Google Fonts @import.
-- **API surface** (`/api`): `settings`, `server/test`, `files/folders`,
-  `files/videos`, `video/{id}`, `video/{id}/subtitles`, `ai/query`, `health`.
+### Frontend
+- **HomePage** — "THE DOSSIER" wordmark, purple gradient DossierMark, glowy pill search, Explore Workspace + gear buttons, ambient purple radial glows.
+- **Onboarding modal** — 3 steps with progress dots, theme+accent (skippable), server URL + optional key + Test button (required), video root folder (required). Persists via PUT /settings.
+- **Workspace (3-panel resizable)**
+  - Explorer: iterative folder tree, expand/collapse, filter, folder counts.
+  - Main: breadcrumb + toolbar, view grid/list, search, stat strip (Indexed / Processing / Error), video cards & rows.
+  - AI Assistant: chat with suggestion chips, /api/ai/query, clickable hits that open player at timestamp.
+- **Video Player** — sample MP4 playback, custom timeline with AI jump markers, subtitle overlay, transcript sidebar (clickable cues).
+- **Settings** — Connection / Storage / Processing / Appearance / Application. Text inputs commit on blur/Enter (no keystroke clearing). Test connection. Theme + accent swatches applied instantly to CSS variables.
+- **TitleBar** — Home / Workspace / Settings nav, engine + server + CPU indicators. Crash-safe against malformed URLs.
 
-## What's been implemented (2026-02)
-- Backend mock engine with all endpoints and seed data.
-- Titlebar with engine health + server host + CPU indicator, safely handles
-  invalid URLs.
-- 3-panel resizable workspace with collapsible Explorer and AI panels.
-- Explorer folder tree (iterative render), search filter, status counts.
-- Video grid + list views with status pills, hover play overlay, duration
-  badges, metadata.
-- Video player: play/pause, skip, volume, fullscreen, timeline with **AI
-  jump markers**, subtitle overlay, transcript sidebar with click-to-seek.
-- AI Assistant chat: mocked keyword search over the seeded videos, hits
-  render as clickable timestamped chips that open the player and seek.
-- Multi-step onboarding modal (3 steps, required validation, live theme
-  preview, connection test).
-- Settings view with commit-on-blur text inputs, sliders, toggles, theme
-  and accent swatches; hot-swaps CSS variables live.
-- Home landing page (added by testing agent) with hero-style search that
-  opens the workspace at the first AI hit.
-- Comprehensive `data-testid` coverage across every interactive element.
-- Backend + frontend green in `iteration_2.json`.
+## Tested
+- Backend 19/19 pytest suite (all endpoints incl. URL normalisation) — PASS
+- Frontend E2E (testing agent iteration 3) — 100% PASS
+  - HomePage hero + search-navigate flow
+  - Onboarding gating & step validation
+  - 3-panel workspace, folder filtering, video card → player
+  - AI query → hit → player seek
+  - Settings sections, theme + accent switching
+  - Cross-navigation & 404 → `/`
 
-## Prioritised backlog
-### P1
-- Real Ollama connection for `/api/ai/query` (replace keyword mock with an
-  HTTP call to the configured processing server; env-configurable).
-- Debounced folder-tree drag-to-resize width persistence across sessions.
-- Command palette (Cmd+K) for global navigation and jump-to-video.
+## Backlog (P2 — optional polish)
+- Backend: Pydantic range validators for `cpu_limit` / `upload_limit_mbps` / `frame_sampling`.
+- Swap `/ai/query` mock for a real Ollama HTTP call when server URL + key are set.
+- Real filesystem scanning would be added when integrating the actual C# engine.
+- Command palette (Cmd/Ctrl-K) for quick navigation.
+- Drag/drop to move videos between folders.
 
-### P2
-- Multiple processing servers with per-server status pills.
-- Cloud sync for settings.
-- Plugin/extension surface for custom index pipelines.
-- Background indexing progress in the title bar (aggregate percentage).
-- User accounts / access control.
-- Advanced search filters (duration, status, folder tags).
-- Drag & drop of files/folders into the Explorer to enqueue processing.
-- Keyboard shortcut hints and a shortcuts help overlay.
-
-## Notes for future contributors
-- Any new backend route MUST live under `/api`.
-- Only `MONGO_URL` + `REACT_APP_BACKEND_URL` env vars are used at runtime.
-- Never store sensitive keys client-side; always PUT to `/api/settings`.
-- New settings fields: add to `Settings` + `SettingsUpdate` pydantic
-  models on backend, and to the `SettingsView` on frontend.
-- Extend `applyThemeVars()` in `store.jsx` if you add new design tokens.
+## Notes
+- No auth. All `/api` endpoints are open — this is intentional; auth would live in the C# engine, not the web frontend.
+- Sample MP4s referenced: Big Buck Bunny + Elephants Dream (Google Commondatastorage).
