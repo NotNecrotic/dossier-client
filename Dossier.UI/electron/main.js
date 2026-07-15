@@ -10,8 +10,9 @@ const __dirname = path.dirname(__filename);
 function createWindow()
 {
     const window = new BrowserWindow({
-        width: 1400,
-        height: 900,
+        width: 1920,
+        height: 1080,
+        icon: path.join(__dirname, "assets/icon.png"),
 
         webPreferences: {
             preload: path.join(
@@ -21,6 +22,7 @@ function createWindow()
         }
     });
 
+    window.maximize();
 
     window.loadURL(
         "http://localhost:5173"

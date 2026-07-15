@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+    --accent-50:  #f5f9ff;
+    --accent-100: #dbeafe;
+    --accent-200: #bfdbfe;
+    --accent-300: #93c5fd;
+    --accent-400: #60a5fa;
+    --accent-500: #3b82f6;
+    --accent-600: #2563eb;
+    --accent-700: #1d4ed8;
+    --accent-800: #1e40af;
+    --accent-900: #1e3a8a;
+
+    --font-heading: "Chivo",system-ui,sans-serif;
+    --font-body: "IBM Plex Sans",system-ui,sans-serif;
+}
+
+.theme-dark {
+    --bg: #09090B;
+    --panel: #141417;
+    --bg: #09090B;
+    --panel: #141417;
+    --surface: #1E1E22;
+    --surface-hover: #27272A;
+    --border: #27272A;
+    --border-strong: #3F3F46;
+    --text: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --overlay: rgba(0, 0, 0, 0.55);
+}
+
+.theme-light {
+    --bg: #FAFAFA;
+    --panel: #F4F4F5;
+    --bg: #FAFAFA;
+    --panel: #F4F4F5;
+    --surface: #FFFFFF;
+    --surface-hover: #F4F4F5;
+    --border: #E4E4E7;
+    --border-strong: #D4D4D8;
+    --text: #09090B;
+    --text-secondary: #52525B;
+    --text-muted: #71717A;
+    --overlay: rgba(15, 15, 20, 0.35);
+}

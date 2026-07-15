@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { ref } from "vue";
+import { Sparkles, Send, FolderOpen, Settings } from "@lucide/vue";
 
 const emit = defineEmits<{
     dashboard: [];
@@ -116,69 +117,30 @@ function handleKeydown(event: KeyboardEvent)
 
 <div 
     id="introContainer"
-    class="intro-container"
+    class="intro-container justify-center items-center"
 >
 
-    <div class="hero-center-group">
+    <div class="hero-center-group ">
 
 
-        <h1 class="brand-title">
-            THE DOSSIER
-        </h1>
-
-
-        <p class="brand-subtitle">
-            Find any moment from any video in seconds.
-        </p>
-
-
-
-        <div class="glow-input-wrapper">
-
-            <div class="border-glow-layer"></div>
-
-
-            <form 
-                class="interactive-search-box"
-                @submit.prevent="submitSearch"
-            >
-
-                <textarea
-                    v-model="searchText"
-                    id="introInput"
-                    placeholder="Describe the scene, conversation, or moment..."
-                    rows="1"
-                    @keydown="handleKeydown"
-                />
-
-
-                <button
-                    type="submit"
-                    id="introSubmitBtn"
-                    class="action-submit-btn"
-                    :disabled="loading"
-                >
-
-                    <span v-if="!loading">
-                        ⚡
-                    </span>
-
-
-                    <span 
-                        v-else
-                        class="thinking-loader-dots"
-                    >
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-
-
-                </button>
-
-            </form>
-
+        <div class="flex items-center justify-center gap-0.5">
+            <img src="../assets/icon.png" class="h-16 w-16"><img>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-[0.02em] translate-y-1">OSSIER</h1>
         </div>
+
+        <div class="mt-12 w-full overflow-hidden relative p-[2px] rounded-full">
+            <div class="search-border-glow-layer"></div>
+            <div class="flex items-center gap-2 rounded-full bg-[var(--panel)] border-2 border-[var(--border-strong)] py-2 pl-5 pr-2" @submit.prevent="submitSearch">
+                <sparkles class="h-4 w-4 opacity-70 text-[var(--accent-500)]"></sparkles>
+                <input v-model="searchText" id="searchInput" placeholder="Describe the scene, conversation, or moment..." class="w-full py-2 focus:outline-none text-sm sm:text-base" @keydown="handleKeydown"></input>
+                <button type="button" id="searchSubmit" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-500)] text-black hover:opacity-90 disabled:opacity-80">
+                    <send class="h-4 w-4"></send>
+                </button>
+            </div>
+        </div>
+
+
+
 
 
 
@@ -198,41 +160,21 @@ function handleKeydown(event: KeyboardEvent)
 
 
 
+
+
+
         <div class="utility-dock">
-
-
-            <button
-                class="utility-btn"
-                @click="openDashboard"
-            >
-
-                <span class="btn-icon">
-                    📁
-                </span>
-
-                Explore Workspace
-
+            <button class="flex items-center gap-2 rounded-full bg-[var(--accent-500)] px-5 py-2.5 text-sm font-medium text-black transition-fast hover:opacity-90" @click="openDashboard">
+                <folder-open class="h-4 w-4"></folder-open>
+                Explore Library
             </button>
 
-
-
-            <button
-                class="utility-btn icon-only"
-                @click="openSettings"
-            >
-
-                <span class="btn-icon">
-                    ⚙️
-                </span>
-
+            <button class="flex items-center justify-center h-10 w-10 gap-2 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]" @click="openSettings">
+                <settings class="h-4 w-4"></settings>
             </button>
-
-
         </div>
 
-
     </div>
-
 </div>
 
 </template>

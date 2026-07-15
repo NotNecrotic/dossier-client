@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg);
+    color: var(--text);
+    background-image: url("./wallpaper.png");
+    background-position: center;
+}
+
+h1 {
+    font-family: var(--font-heading);
+}
+
+button:not(:disabled) {
+    cursor: pointer;
+}
+
+.search-border-glow-layer {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        transparent, 
+        transparent, 
+        var(--accent-500), 
+        transparent, 
+        transparent
+    );
+    animation: borderRotate 4s linear infinite;
+    z-index: -1;
+}
+
+@keyframes borderRotate {
+    100% { transform: rotate(360deg); }
+}

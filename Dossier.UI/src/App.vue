@@ -14,7 +14,7 @@ import {
 
 const loading = ref(true)
 
-const onboardingComplete = ref(false)
+const onboarding = ref(true)
 
 const currentScreen = ref("search")
 
@@ -24,7 +24,7 @@ async function checkState() {
   try {
     const state = await getClientState();
 
-    onboardingComplete.value = state.Onboarding;
+    onboarding.value = state.onboarding;
   } catch (error) {
     console.error("Failed loading state", error);
     
@@ -36,10 +36,10 @@ async function checkState() {
 
 async function finishOnboarding() {
   await updateClientState({
-    Onboarding:true
-  }),
+    onboarding:false
+  });
 
-  onboardingComplete.value = true;
+  onboarding.value = false;
 }
 
 function openDashboard()
@@ -53,29 +53,36 @@ onMounted(checkState);
 
 <template>
 
-
-<Onboarding 
-    v-if="!onboardingComplete"
-    @complete="finishOnboarding"
-/>
+<div v-if="loading">
+    Loading Dossier...
+</div>
 
 
-<SearchScreen
-    v-if="!showOnboarding && currentScreen==='search'"
-    @dashboard="openDashboard"
-    @settings="showSettings=true"
-/>
+
+<template v-else>
+
+  <Onboarding 
+      v-if="onboarding"
+      @complete="finishOnboarding"
+  />
 
 
-<Dashboard
-    v-if="currentScreen==='dashboard'"
-/>
+  <SearchScreen
+      v-if="!onboarding && currentScreen==='search'"
+      @dashboard="openDashboard"
+      @settings="showSettings=true"
+  />
 
 
-<SettingsModal
-    v-if="showSettings"
-    @close="showSettings=false"
-/>
+  <Dashboard
+      v-if="currentScreen==='dashboard'"
+  />
 
 
+  <SettingsModal
+      v-if="showSettings"
+      @close="showSettings=false"
+  />
+
+</template>
 </template>
