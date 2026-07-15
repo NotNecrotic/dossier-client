@@ -114,67 +114,61 @@ function handleKeydown(event: KeyboardEvent)
 
 
 <template>
+    <div class="flex flex-1 justify-center items-center z-1 search">
+        <div class="w-full max-w-2xl">
 
-<div 
-    id="introContainer"
-    class="intro-container justify-center items-center"
->
-
-    <div class="hero-center-group ">
-
-
-        <div class="flex items-center justify-center gap-0.5">
-            <img src="../assets/icon.png" class="h-16 w-16"><img>
-            <h1 class="text-4xl sm:text-5xl font-bold tracking-[0.02em] translate-y-1">OSSIER</h1>
-        </div>
-
-        <div class="mt-12 w-full overflow-hidden relative p-[2px] rounded-full">
-            <div class="search-border-glow-layer"></div>
-            <div class="flex items-center gap-2 rounded-full bg-[var(--panel)] border-2 border-[var(--border-strong)] py-2 pl-5 pr-2" @submit.prevent="submitSearch">
-                <sparkles class="h-4 w-4 opacity-70 text-[var(--accent-500)]"></sparkles>
-                <input v-model="searchText" id="searchInput" placeholder="Describe the scene, conversation, or moment..." class="w-full py-2 focus:outline-none text-sm sm:text-base" @keydown="handleKeydown"></input>
-                <button type="button" id="searchSubmit" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-500)] text-black hover:opacity-90 disabled:opacity-80">
-                    <send class="h-4 w-4"></send>
-                </button>
+            <div class="flex items-center justify-center gap-0.5">
+                <img src="../assets/icon.png" class="h-16 w-16"><img>
+                <h1 class="text-4xl sm:text-5xl font-bold tracking-[0.02em] translate-y-1">OSSIER</h1>
             </div>
-        </div>
+
+            <div class="mt-12 w-full overflow-hidden relative p-[2px] rounded-full">
+                <div class="search-border-glow-layer"></div>
+                <div class="flex items-center gap-2 rounded-full bg-[var(--panel)] border-2 border-[var(--border-strong)] py-2 pl-5 pr-2" @submit.prevent="submitSearch">
+                    <sparkles class="h-4 w-4 opacity-70 text-[var(--accent-500)]"></sparkles>
+                    <input v-model="searchText" id="searchInput" placeholder="Describe the scene, conversation, or moment..." class="w-full py-2 focus:outline-none text-sm sm:text-base" @keydown="handleKeydown"></input>
+                    <button type="button" id="searchSubmit" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-500)] text-black hover:opacity-90 disabled:opacity-80">
+                        <send class="h-4 w-4"></send>
+                    </button>
+                </div>
+            </div>
 
 
 
 
 
-
-        <div 
-            id="menuChatStatusContainer"
-        >
 
             <div 
-                v-if="statusMessage"
-                class="menu-status-notice"
+                id="menuChatStatusContainer"
             >
-                {{ statusMessage }}
+
+                <div 
+                    v-if="statusMessage"
+                    class="menu-status-notice"
+                >
+                    {{ statusMessage }}
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div class="utility-dock">
+                <button class="flex items-center gap-2 rounded-full bg-[var(--accent-500)] px-5 py-2.5 text-sm font-medium text-black transition-fast hover:opacity-90" @click="openDashboard">
+                    <folder-open class="h-4 w-4"></folder-open>
+                    Explore Library
+                </button>
+
+                <button class="flex items-center justify-center h-10 w-10 gap-2 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]" @click="openSettings">
+                    <settings class="h-4 w-4"></settings>
+                </button>
             </div>
 
         </div>
-
-
-
-
-
-
-
-        <div class="utility-dock">
-            <button class="flex items-center gap-2 rounded-full bg-[var(--accent-500)] px-5 py-2.5 text-sm font-medium text-black transition-fast hover:opacity-90" @click="openDashboard">
-                <folder-open class="h-4 w-4"></folder-open>
-                Explore Library
-            </button>
-
-            <button class="flex items-center justify-center h-10 w-10 gap-2 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]" @click="openSettings">
-                <settings class="h-4 w-4"></settings>
-            </button>
-        </div>
-
     </div>
-</div>
 
 </template>

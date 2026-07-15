@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
-
 body {
     font-family: var(--font-body);
     background-color: var(--bg);
     color: var(--text);
-    background-image: url("./wallpaper.png");
-    background-position: center;
 }
 
 h1 {
     font-family: var(--font-heading);
+}
+
+.search {
+    background-image: url("./wallpaper.png");
+    background-position: center;
 }
 
 button:not(:disabled) {
