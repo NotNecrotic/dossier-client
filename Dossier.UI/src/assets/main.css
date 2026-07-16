@@ -11,8 +11,14 @@ h1 {
 }
 
 .search {
-    background-image: url("./wallpaper.png");
     background-position: center;
+}
+.theme-dark .search {
+    background-image: url("./bg-dark.png");
+}
+
+.theme-light .search {
+    background-image: url("./bg-light.png");
 }
 
 button:not(:disabled) {
