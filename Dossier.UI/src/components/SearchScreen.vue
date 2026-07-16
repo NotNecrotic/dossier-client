@@ -2,20 +2,19 @@
 
 import { ref } from "vue";
 import { Sparkles, Send, FolderOpen, Settings } from "@lucide/vue";
+import Icon from "../assets/icon.svg";
+
 
 const emit = defineEmits<{
     dashboard: [];
     settings: [];
 }>();
 
-
 const searchText = ref("");
 
 const loading = ref(false);
 
 const statusMessage = ref("");
-
-
 
 function openDashboard()
 {
@@ -117,8 +116,8 @@ function handleKeydown(event: KeyboardEvent)
     <div class="flex flex-1 justify-center items-center z-1 search">
         <div class="w-full max-w-2xl">
 
-            <div class="flex items-center justify-center gap-0.5">
-                <img src="../assets/icon.png" class="h-16 w-16"><img>
+            <div class="flex items-center justify-center gap-1">
+                <icon class="h-16 w-16 text-[var(--text)]"></icon>
                 <h1 class="text-4xl sm:text-5xl font-bold tracking-[0.02em] translate-y-1">OSSIER</h1>
             </div>
 

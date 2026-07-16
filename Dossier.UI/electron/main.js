@@ -10,8 +10,8 @@ const __dirname = path.dirname(__filename);
 function createWindow()
 {
     const window = new BrowserWindow({
-        width: 1920,
-        height: 1080,
+        width: 1440,
+        height: 900,
         icon: path.join(__dirname, "assets/icon.png"),
 
         webPreferences: {

@@ -13,13 +13,13 @@
     --accent-800: #1e40af;
     --accent-900: #1e3a8a;
 
+    --accent-glow: rgba(59, 130, 246, 0.15);
+
     --font-heading: "Chivo",system-ui,sans-serif;
     --font-body: "IBM Plex Sans",system-ui,sans-serif;
 }
 
 .theme-dark {
-    --bg: #09090B;
-    --panel: #141417;
     --bg: #09090B;
     --panel: #141417;
     --surface: #1E1E22;
@@ -33,8 +33,6 @@
 }
 
 .theme-light {
-    --bg: #FAFAFA;
-    --panel: #F4F4F5;
     --bg: #FAFAFA;
     --panel: #F4F4F5;
     --surface: #FFFFFF;

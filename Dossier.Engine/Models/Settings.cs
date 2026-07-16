@@ -19,4 +19,5 @@ public class Settings
     public int FrameSamplingInterval { get; set; } = 5;
 
     public string Theme { get; set; } = "dark";
+    public string Accent { get; set; } = "blue";
 }

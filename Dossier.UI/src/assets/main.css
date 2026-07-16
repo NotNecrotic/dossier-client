@@ -6,19 +6,13 @@ body {
     color: var(--text);
 }
 
-h1 {
+h1, h2 {
     font-family: var(--font-heading);
 }
 
 .search {
     background-position: center;
-}
-.theme-dark .search {
-    background-image: url("./bg-dark.png");
-}
-
-.theme-light .search {
-    background-image: url("./bg-light.png");
+    background-image: var(--background-image);
 }
 
 button:not(:disabled) {

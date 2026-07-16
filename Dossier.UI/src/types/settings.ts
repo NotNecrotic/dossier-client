@@ -16,5 +16,7 @@ export interface DossierSettings
 
     startMinimized: boolean;
 
-    theme: "dark" | "light" | "system";
+    theme: "dark" | "light";
+
+    accent: "blue" | "green" | "red";
 }
