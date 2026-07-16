@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { ref } from "vue";
-import { Sparkles, Send, FolderOpen, Settings } from "@lucide/vue";
+import { Sparkles, Send, FolderOpen, Settings as SettingsIcon} from "@lucide/vue";
 import Icon from "../assets/icon.svg";
 
 
@@ -107,13 +107,10 @@ function handleKeydown(event: KeyboardEvent)
     }
 }
 
-
 </script>
 
-
-
 <template>
-    <div class="flex flex-1 justify-center items-center z-1 search">
+    <div class="flex flex-1 mx-auto px-8 py-12 justify-center items-center h-screen z-1 search">
         <div class="w-full max-w-2xl">
 
             <div class="flex items-center justify-center gap-1">
@@ -163,7 +160,7 @@ function handleKeydown(event: KeyboardEvent)
                 </button>
 
                 <button class="flex items-center justify-center h-10 w-10 gap-2 rounded-full bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]" @click="openSettings">
-                    <settings class="h-4 w-4"></settings>
+                    <settings-icon class="h-4 w-4"></settings-icon>
                 </button>
             </div>
 

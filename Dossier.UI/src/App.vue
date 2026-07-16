@@ -125,7 +125,7 @@ onMounted(async () => {
 
     <Dashboard v-if="currentScreen === 'dashboard'" />
 
-    <Settings v-if="currentScreen === 'settings'" @close="setView('search')" />
+    <Settings v-if="currentScreen === 'settings'" :setView="setView" @close="setView('search')" />
 
   </template>
 </template>

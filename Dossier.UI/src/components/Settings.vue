@@ -11,7 +11,11 @@ import Slider from "./settings/Slider.vue";
 import Toggle from "./settings/Toggle.vue";
 import { ACCENTS } from "../constants/accents";
 
-import { Server, HardDrive, Cpu, Palette, Check, Loader2, KeyRound, Sun, Moon, Zap, MonitorCog } from "@lucide/vue";
+import { Server, HardDrive, Cpu, Palette, Check, Loader2, KeyRound, Sun, Moon, Zap, MonitorCog, Folder, ArrowLeft } from "@lucide/vue";
+
+const { setView } = defineProps({
+    setView: Function
+})
 
 const {
     settings,
@@ -30,14 +34,27 @@ async function set(patch) {
     await updateSettings(settings.value);
 }
 
-async function runTest() {
+async function selectVideoFolder()
+{
+    const folder = await window.electron.selectFolder();
+
+    if (!folder)
+        return;
+
+
+    await updateSettings({
+        watchFolder: folder
+    });
+}
+
+async function testConnection() {
     testing.value = true;
     testResult.value = null;
 
     try {
         const res = await serverApi.test({
-            url: settings.server_url,
-            key: settings.server_key,
+            url: settings.serverUrl,
+            key: settings.serverKey,
         });
 
         testResult.value = res;
@@ -69,6 +86,11 @@ async function runTest() {
     </div>
 
     <div v-else class="mx-auto max-w-4xl px-8 py-12">
+        <button @click="setView('search')" class="mb-6 flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)]">
+            <ArrowLeft class="h-4 w-4"/>
+            Back
+        </button>
+
         <div class="mb-10">
             <h1 class="font-heading text-4xl font-bold tracking-tight text-[var(--text)]">Settings</h1>
             <p class="mt-2 text-sm text-[var(--text-secondary)]">Configure how Dossier connects to your processing
@@ -80,13 +102,13 @@ async function runTest() {
                 description="Where Dossier delegates transcription, embeddings, and AI queries.">
 
                 <Row title="Processing server URL" description="Press Enter or click away to save.">
-                    <PillInput :value="settings.server_url" placeholder="https://ollama.local:11434" mono
-                        @commit="set({ server_url: $event })" />
+                    <PillInput :value="settings.serverUrl" placeholder="https://ollama.local:11434" mono
+                        @commit="set({ serverUrl: $event })" />
                 </Row>
 
                 <Row title="Server key" description="Access key stored on the local engine only.">
-                    <PillInput :value="settings.server_key" placeholder="sk-•••" type="password" mono :icon="KeyRound"
-                        @commit="set({ server_key: $event })" />
+                    <PillInput :value="settings.serverKey" placeholder="sk-•••" type="password" mono :icon="KeyRound"
+                        @commit="set({ serverKey: $event })" />
                 </Row>
 
                 <Row title="Connection test" description="Verify Dossier can reach your server.">
@@ -108,7 +130,7 @@ async function runTest() {
 
                         </span>
 
-                        <button type="button" :disabled="testing || !settings.server_url" @click="runTest" class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)] disabled:text-[var(--text-muted)]">
+                        <button type="button" :disabled="testing || !settings.serverUrl" @click="testConnection" class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)] disabled:text-[var(--text-muted)]">
                             <Loader2 v-if="testing" class="h-3.5 w-3.5 animate-spin"/>
                             <Zap v-else class="h-3.5 w-3.5 text-[var(--accent-500)]"/>
                             Test connection
@@ -120,25 +142,21 @@ async function runTest() {
 
             <Section :icon="HardDrive" title="Storage" description="Where your videos live on disk.">
                 <Row title="Video root folder" description="Top-level folder to scan recursively.">
-                    <PillInput :value="settings.video_root" placeholder="/Users/you/Videos" mono
-                        @commit="set({ video_root: $event })"/>
+                    <div class="flex gap-2">
+                        <PillInput :value="settings.watchFolder" placeholder="/Users/you/Videos" mono
+                        @commit="set({ watchFolder: $event })"/>
+                        <button class="flex items-center justify-center h-10 w-10 gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]" @click="selectVideoFolder">
+                            <folder class="h-4 w-4"></folder>
+                        </button>
+                    </div>
+                    
                 </Row>
             </Section>
 
             <Section :icon="Cpu" title="Processing" description="Limits applied while indexing runs locally.">
                 <Row title="CPU usage limit" description="Cap engine CPU during processing.">
-                    <Slider :value="settings.cpu_limit" :min="10" :max="100" :step="5" unit="%"
-                        @change="set({ cpu_limit: $event })"/>
-                </Row>
-
-                <Row title="Upload bandwidth" description="Maximum outbound throughput.">
-                    <Slider :value="settings.upload_limit_mbps" :min="1" :max="200" unit="Mbps"
-                        @change="set({ upload_limit_mbps: $event })"/>
-                </Row>
-
-                <Row title="Frame sampling rate" description="Frames per second sampled for embeddings.">
-                    <Slider :value="settings.frame_sampling" :min="1" :max="30" unit="fps"
-                        @change="set({ frame_sampling: $event })"/>
+                    <Slider :value="settings.cpuLimitPercent" :min="10" :max="100" :step="5" unit="%"
+                        @change="set({ cpuLimitPercent: $event })"/>
                 </Row>
             </Section>
 
@@ -184,11 +202,11 @@ async function runTest() {
 
             <Section :icon="MonitorCog" title="Application" description="Startup behaviour and background operation.">
                 <Row title="Start on system boot" description="Launch the Dossier engine automatically.">
-                    <Toggle :value="settings.start_on_boot" @change="set({ start_on_boot: $event })"/>
+                    <Toggle :value="settings.startOnBoot" @change="set({ startOnBoot: $event })"/>
                 </Row>
 
                 <Row title="Run in system tray" description="Keep the engine indexing after the UI is closed.">
-                    <Toggle :value="settings.tray_mode" @change="set({ tray_mode: $event })"/>
+                    <Toggle :value="settings.startMinimized" @change="set({ startMinimized: $event })"/>
                 </Row>
             </Section>
         </div>

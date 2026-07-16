@@ -2,15 +2,11 @@ export interface DossierSettings
 {
     serverUrl: string;
 
-    serverKey?: string;
+    serverKey: string;
 
     watchFolder: string;
 
-    uploadLimit: number;
-
-    cpuLimit: number;
-
-    frameInterval: number;
+    cpuLimitPercent: number;
 
     startOnBoot: boolean;
 
@@ -18,5 +14,5 @@ export interface DossierSettings
 
     theme: "dark" | "light";
 
-    accent: "blue" | "green" | "red";
+    accent: "blue" | "green" | "red" | "pink";
 }

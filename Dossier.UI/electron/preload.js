@@ -1,1 +1,8 @@
-console.log("Dossier preload loaded");
+const { contextBridge, ipcRenderer } = require("electron");
+
+contextBridge.exposeInMainWorld(
+    "electron",
+    {
+        selectFolder: () => ipcRenderer.invoke("select-folder")
+    }
+);

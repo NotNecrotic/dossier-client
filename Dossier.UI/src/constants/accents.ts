@@ -22,4 +22,10 @@ export const ACCENTS: Record<string, Accent> = {
         main: "#22C55E",
         glow: "rgba(34, 197, 94, 0.45)",
     },
+
+    Pink: {
+        name: "Pink",
+        main: "#f55cab",
+        glow: "rgba(245, 92, 171, 0.5)",
+    },
 };
