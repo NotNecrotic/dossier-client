@@ -1,5 +1,5 @@
 <template>
-    <div class="app-container active">
+    <div class="search grid grid-cols-[320px_minmax(0,1fr)_360px] h-screen w-screen items-center justify-center w-full">
 
         <!-- FILE EXPLORER -->
         <FileExplorer

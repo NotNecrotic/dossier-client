@@ -1,87 +1,7 @@
-<template>
-
-<div class="chat-panel">
-
-    <div class="panel-header">
-        DOSSIER COORDINATOR
-    </div>
-
-
-
-    <div
-        class="chat-history"
-        ref="chatHistory"
-    >
-
-        <div
-            v-for="(message, index) in messages"
-            :key="index"
-            class="chat-message"
-            :class="message.sender"
-        >
-
-            {{ message.text }}
-
-        </div>
-
-
-
-        <div
-            v-if="loading"
-            class="chat-message system-loading"
-        >
-            AI is looking through archives...
-        </div>
-
-
-    </div>
-
-
-
-
-
-    <div class="chat-input-wrapper">
-
-        <form
-            class="chat-form"
-            @submit.prevent="sendMessage"
-        >
-
-            <input
-                v-model="input"
-                class="chat-input"
-                placeholder="Ask coordinator to locate logs..."
-                autocomplete="off"
-            >
-
-
-            <button
-                class="chat-submit"
-                type="submit"
-                :disabled="loading"
-            >
-                SEND
-            </button>
-
-
-        </form>
-
-
-    </div>
-
-
-</div>
-
-</template>
-
-
-
 <script setup lang="ts">
 
-import {
-    ref,
-    nextTick
-} from "vue";
+import { ref, nextTick } from "vue";
+import { Sparkles, ChevronsRight, Send } from "@lucide/vue";
 
 
 
@@ -314,3 +234,103 @@ function addMessage(
 
 
 </script>
+
+<template>
+    <div class="flex h-full flex-col bg-[var(--panel)] border-l-2 border-[var(--border-strong)]">
+
+        <div class="flex h-9 items-center justify-between border-b border-[var(--border-strong)] px-2">
+            <div class="flex items-center gap-1.5">
+                <sparkles class="h-4 w-4 text-[var(--accent-500)]"></sparkles>
+                <span class="text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">Assistant</span>
+            </div>
+            <button type="button" class="rounded-[3px] p-1 text-[var(--text-muted)] hover:bg-[var(--accent-500)] hover:text-[var(--text)]">
+                <chevrons-right class="h-4 w-4"></chevrons-right>
+            </button>
+        </div>
+
+        <div></div>
+
+
+
+
+
+
+        <div
+            class="chat-history"
+            ref="chatHistory"
+        >
+
+            <div
+                v-for="(message, index) in messages"
+                :key="index"
+                class="chat-message"
+                :class="message.sender"
+            >
+
+                {{ message.text }}
+
+            </div>
+
+
+
+            <div
+                v-if="loading"
+                class="chat-message system-loading"
+            >
+                AI is looking through archives...
+            </div>
+
+
+        </div>
+
+
+
+        <form class="border-t border-[var(--border-strong)] p-3">
+            <div class="flex items-center gap-2 rounded-full border-2 border-[var(--border-strong)] bg-[var(--surface)] pl-4 pr-1.5 py-1.5 focus-within:shadow-[0_0_0_4px_var(--accent-glow)]">
+                <Sparkles class="h-4 w-4 flex-shrink-0 text-[var(--accent-500)] opacity-70"></Sparkles>
+                <input placeholder="Ask about your videos…" class="w-full bg-transparent text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none">
+                <button type="submit" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--text-muted)]">
+                    <send class="h-4 w-4"></send>
+                </button>
+            </div>
+            <div>
+                <span></span>
+                <span>
+                    <span></span>
+                </span>
+            </div>
+        </form>
+
+        <div class="chat-input-wrapper">
+
+            <form
+                class="chat-form"
+                @submit.prevent="sendMessage"
+            >
+
+                <input
+                    v-model="input"
+                    class="chat-input"
+                    placeholder="Ask coordinator to locate logs..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    class="chat-submit"
+                    type="submit"
+                    :disabled="loading"
+                >
+                    SEND
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+</template>

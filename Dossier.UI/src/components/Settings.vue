@@ -92,7 +92,7 @@ async function testConnection() {
         </button>
 
         <div class="mb-10">
-            <h1 class="font-heading text-4xl font-bold tracking-tight text-[var(--text)]">Settings</h1>
+            <h1 class="text-4xl font-bold tracking-tight text-[var(--text)]">Settings</h1>
             <p class="mt-2 text-sm text-[var(--text-secondary)]">Configure how Dossier connects to your processing
                 server and indexes your library.</p>
         </div>
