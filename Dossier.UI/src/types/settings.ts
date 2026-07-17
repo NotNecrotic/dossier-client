@@ -14,5 +14,5 @@ export interface DossierSettings
 
     theme: "dark" | "light";
 
-    accent: "blue" | "green" | "red" | "pink";
+    accent: "blue" | "green" | "red" | "pink" | "oxy";
 }

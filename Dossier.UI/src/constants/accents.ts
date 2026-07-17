@@ -28,4 +28,10 @@ export const ACCENTS: Record<string, Accent> = {
         main: "#f55cab",
         glow: "rgba(245, 92, 171, 0.5)",
     },
+
+    oxy: {
+        name: "oxy",
+        main: "#ff00e6",
+        glow: "rgba(255, 0, 230, 0.5)",
+    },
 };
