@@ -106,8 +106,11 @@ namespace Dossier.Engine.Workers.Implementations
             foreach (var index in streamIndexes)
             {
                 var output = Path.Combine(outputFolder, $"audio_stream_{index}.opus");
+                var threads = GetFfmpegThreads();
                 
-                var args = $"-nostats -loglevel error -i \"{videoPath}\" -map 0:{index} -vn -ac 1 -ar 24000 -c:a libopus -b:a 32k -vbr off \"{output}\" -y";
+                var args = 
+                    $"-threads {threads} " +
+                    $"-nostats -loglevel error -i \"{videoPath}\" -map 0:{index} -vn -ac 1 -ar 24000 -c:a libopus -b:a 32k -vbr off \"{output}\" -y";
 
                 var startInfo = new ProcessStartInfo
                 {
@@ -122,7 +125,9 @@ namespace Dossier.Engine.Workers.Implementations
                 using (var process = Process.Start(startInfo))
                 {
                     if (process != null)
-                    {
+                    {   
+                        process.PriorityClass = ProcessPriorityClass.BelowNormal;
+
                         process.WaitForExit();
                         if (process.ExitCode != 0)
                         {
@@ -141,8 +146,11 @@ namespace Dossier.Engine.Workers.Implementations
         {
             var ffmpegPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg.exe");
             var proxyPath = Path.Combine(outputFolder, "proxy.mp4");
+            var threads = GetFfmpegThreads();
 
-            var args = $"-nostats -loglevel verbose -i \"{videoPath}\" -vf \"fps=1,scale=1280:720\" -c:v libx264 -crf 28 -preset fast -an -movflags +faststart \"{proxyPath}\" -y";
+            var args = 
+                $"-threads {threads} " +
+                $"-nostats -loglevel verbose -i \"{videoPath}\" -vf \"fps=1,scale=1280:720\" -c:v libx264 -crf 28 -preset fast -an -movflags +faststart \"{proxyPath}\" -y";
             var startInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
@@ -187,6 +195,20 @@ namespace Dossier.Engine.Workers.Implementations
             });
 
             File.WriteAllText(path, json);
+        }
+
+        private int GetFfmpegThreads()
+        {
+            var settings = _settingsService.Get();
+
+            return Math.Clamp(
+                (int)Math.Round(
+                    Environment.ProcessorCount *
+                    (settings.CpuLimitPercent / 100.0)
+                ),
+                1,
+                Environment.ProcessorCount
+            );
         }
     }
 }
