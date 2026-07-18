@@ -1,110 +1,46 @@
-<template>
-
-<div class="main-content">
-
-    <div
-        class="player-wrapper"
-        style="position: relative; width:100%;"
-    >
-
-
-        <div
-            v-if="!video"
-            class="no-video-placeholder"
-        >
-            Select a target sequence or video clip from the panel to begin execution.
-        </div>
-
-
-
-        <video
-            v-else
-            ref="videoPlayer"
-            controls
-            style="width:100%;"
-        >
-        </video>
-
-
-
-        <!-- Custom subtitle overlay -->
-        <div
-            ref="subtitleOverlay"
-            class="subtitle-overlay"
-            v-show="activeSubtitle"
-        >
-            {{ activeSubtitle }}
-        </div>
-
-
-    </div>
-
-
-
-    <div
-        class="video-title-overlay"
-    >
-
-        {{ video?.name ?? "" }}
-
-    </div>
-
-
-</div>
-
-</template>
-
-
-
 <script setup lang="ts">
 
 import {
     ref,
     watch,
-    onMounted
+    onMounted,
+    computed,
+    nextTick
 } from "vue";
 
+const API = "http://127.0.0.1:5187";
 
 
-interface VideoItem
+
+interface ExplorerVideo
 {
-    name:string;
+    id: string;
 
-    path:string;
+    name: string;
 
-    metadata?: {
+    path: string;
 
-        has_subtitles?: boolean;
+    type: "file";
 
-        subtitle_path?: string;
-
-    };
+    status?: string;
 }
 
 
 
 const props = defineProps<{
 
-    video:
-        VideoItem | null;
+    video: ExplorerVideo | null;
 
 }>();
 
 
 
-
-const API =
-    "http://127.0.0.1:5187";
+const video = computed(() => props.video);
 
 
 
 const videoPlayer =
     ref<HTMLVideoElement | null>(null);
-
-
-
-const subtitleOverlay =
-    ref<HTMLDivElement | null>(null);
 
 
 
@@ -132,14 +68,13 @@ const subtitles =
 
 
 watch(
-    () => props.video,
-    () =>
+    video,
+    async (newVideo) =>
     {
-        if(props.video)
+        if(newVideo)
         {
-            loadVideo(
-                props.video
-            );
+            await nextTick();
+            loadVideo(newVideo);
         }
     }
 );
@@ -148,53 +83,69 @@ watch(
 
 
 
-
-
-async function loadVideo(
-    video:VideoItem
-)
+async function loadVideo(video: ExplorerVideo)
 {
+    await nextTick();
 
     if(!videoPlayer.value)
         return;
 
 
-
     const url =
-        `${API}/api/video/${encodeURIComponent(video.path)}`;
+        `${API}/api/video?path=${encodeURIComponent(video.path)}`;
 
 
-
-    videoPlayer.value.src =
-        url;
+    console.log("Loading:", url);
 
 
+    videoPlayer.value.src = url;
 
     videoPlayer.value.load();
 
 
-
-    subtitles.value = [];
-
-
-
-    if(
-        video.metadata?.has_subtitles
-        &&
-        video.metadata.subtitle_path
-    )
+    videoPlayer.value.onloadedmetadata = () =>
     {
+        console.log("Metadata loaded", {
+            duration: videoPlayer.value?.duration,
+            width: videoPlayer.value?.videoWidth,
+            height: videoPlayer.value?.videoHeight
+        });
+    };
 
-        await loadSubtitles(
-            video.metadata.subtitle_path
-        );
 
-    }
+    videoPlayer.value.oncanplay = () =>
+    {
+        console.log("Can play");
+    };
+
+    videoPlayer.value.play()
+    .then(() => {
+        console.log("Playing");
+    })
+    .catch(err => {
+        console.error("Play failed:", err);
+    });
+
+    videoPlayer.value.addEventListener(
+        "playing",
+        () => {
+            console.log("Actually playing");
+        }
+    );
 
 
+    videoPlayer.value.addEventListener(
+        "waiting",
+        () => {
+            console.log("Buffering");
+        }
+    );
+
+    videoPlayer.value.onerror = () =>
+    {
+        console.error(videoPlayer.value?.error);
+    };
 }
-
-
 
 
 
@@ -212,7 +163,6 @@ async function loadSubtitles(
             await fetch(
                 `${API}${path}`
             );
-
 
 
         if(!response.ok)
@@ -245,20 +195,10 @@ async function loadSubtitles(
 
 
 
-
 function parseSubtitles(
     text:string
 ):Subtitle[]
 {
-
-    /*
-        Expected format:
-
-        00:00:01 --> 00:00:04
-        Hello world
-
-    */
-
 
     const blocks =
         text.split(/\n\n+/);
@@ -324,8 +264,6 @@ function parseSubtitles(
 
 
 
-
-
 function timestampToSeconds(
     value:string
 )
@@ -357,44 +295,134 @@ function timestampToSeconds(
 
 onMounted(() =>
 {
-
     if(!videoPlayer.value)
         return;
 
+
+    videoPlayer.value.addEventListener(
+        "error",
+        () =>
+        {
+            console.error(
+                "Video error:",
+                videoPlayer.value?.error
+            );
+        }
+    );
+
+
+    videoPlayer.value.addEventListener(
+        "loadedmetadata",
+        () =>
+        {
+            console.log("Video loaded successfully");
+        }
+    );
 
 
     videoPlayer.value.addEventListener(
         "timeupdate",
         () =>
         {
-
             const current =
                 videoPlayer.value!.currentTime;
-
 
 
             const subtitle =
                 subtitles.value.find(
                     s =>
-                        current >= s.start
-                        &&
+                        current >= s.start &&
                         current <= s.end
                 );
 
 
-
             activeSubtitle.value =
                 subtitle
-                ?
-                subtitle.text
-                :
-                "";
-
+                ? subtitle.text
+                : "";
         }
     );
 
 });
 
+function playVideo()
+{
+    if(videoPlayer.value)
+    {
+        videoPlayer.value.play()
+            .then(() =>
+            {
+                console.log("Playing");
+            })
+            .catch(error =>
+            {
+                console.error("Play failed:", error);
+            });
+    }
+}
 
 
 </script>
+
+
+
+<template>
+
+<div class="main-content">
+
+
+    <div
+        class="player-wrapper"
+        style="position:relative; width:100%;"
+    >
+
+
+        <div
+            v-if="!video"
+            class="no-video-placeholder"
+        >
+            Select a video from Explorer to begin.
+        </div>
+
+
+
+        <video
+            v-else
+            ref="videoPlayer"
+            controls
+            autoplay
+            style="width:100%; display: block;"
+        >
+        </video>
+
+
+
+
+        <div
+            ref="subtitleOverlay"
+            class="subtitle-overlay"
+            v-show="activeSubtitle"
+        >
+            {{ activeSubtitle }}
+        </div>
+
+
+    </div>
+
+
+
+    <button @click="playVideo">
+    Play Test
+</button>
+
+    <div class="video-title-overlay">
+
+        {{ video?.name ?? "" }}
+
+    </div>
+
+
+
+</div>
+
+</template>

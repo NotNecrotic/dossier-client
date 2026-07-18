@@ -1,9 +1,10 @@
 <template>
-    <div class="search grid grid-cols-[320px_minmax(0,1fr)_360px] h-screen w-screen items-center justify-center w-full">
+
+    <div class="search grid grid-cols-[320px_minmax(0,1fr)_360px] h-screen w-screen">
 
         <!-- FILE EXPLORER -->
         <FileExplorer
-            @video-selected="selectVideo"
+            @select-video="selectVideo"
         />
 
 
@@ -20,6 +21,7 @@
 
 
     </div>
+
 </template>
 
 
@@ -36,21 +38,21 @@ import ChatPanel from "./ChatPanel.vue";
 
 interface VideoItem
 {
-    path: string;
+    id: string;
+
     name: string;
 
-    metadata?: {
+    path: string;
 
-        has_subtitles?: boolean;
+    type: "file";
 
-        subtitle_path?: string;
-
-    };
+    status?: string;
 }
 
 
 
-const currentVideo = ref<VideoItem | null>(null);
+const currentVideo =
+    ref<VideoItem | null>(null);
 
 
 
@@ -58,6 +60,5 @@ function selectVideo(video: VideoItem)
 {
     currentVideo.value = video;
 }
-
 
 </script>

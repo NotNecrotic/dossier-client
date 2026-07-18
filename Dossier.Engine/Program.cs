@@ -7,6 +7,7 @@ builder.Services.AddHttpClient();
 
 
 builder.Services.AddSingleton<ClientStateService>();
+builder.Services.AddSingleton<ExplorerService>();
 builder.Services.AddSingleton<SettingsService>();
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<ClientEngine>();
