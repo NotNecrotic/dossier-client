@@ -34,14 +34,7 @@ namespace Dossier.Engine.Services
             string fingerprint,
             CancellationToken token = default)
         {   
-            _logger.LogInformation(
-                "UPLOAD CALLED: {Path} | {Fingerprint}",
-                filePath,
-                fingerprint
-            );
-
-            return;
-            /* var fileInfo = new FileInfo(filePath);
+            var fileInfo = new FileInfo(filePath);
 
 
             _logger.LogInformation(
@@ -93,7 +86,7 @@ namespace Dossier.Engine.Services
 
             _logger.LogInformation(
                 "Upload completed successfully."
-            );*/
+            );
         }
 
 
@@ -103,7 +96,7 @@ namespace Dossier.Engine.Services
 
         private async Task<BeginUploadResponse> BeginUploadAsync(
             string fingerprint,
-            long size,
+            long fileSize,
             CancellationToken token)
         {
             var settings =
@@ -111,7 +104,7 @@ namespace Dossier.Engine.Services
 
 
             var url =
-                $"{settings.ServerUrl}/api/uploads/begin";
+                $"{settings.ServerUrl}/api/upload/begin";
 
 
             var request =
@@ -133,7 +126,7 @@ namespace Dossier.Engine.Services
                     new
                     {
                         fingerprint,
-                        size
+                        fileSize
                     }
                 );
 
