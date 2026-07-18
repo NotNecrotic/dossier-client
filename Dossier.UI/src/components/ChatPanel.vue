@@ -248,12 +248,13 @@ function addMessage(
             </button>
         </div>
 
-        <div></div>
-
-
-
-
-
+        <div class="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+            <div class="flex">
+                <div class="w-full border-l-2 border-[var(--accent-500)] pl-3">
+                    <div class="text-sm text-[var(--text)]">Hi. Ask me anything about your video library — I'll surface the exact moment.</div>
+                </div>
+            </div>
+        </div>
 
         <div
             class="chat-history"
