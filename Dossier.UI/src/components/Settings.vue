@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { toast } from "vue-sonner";
 
 import { useSettings } from "../composables/useSettings";
+import { serverApi } from "../api/server";
 
 import Section from "./settings/Section.vue";
 import Row from "./settings/Row.vue";
@@ -52,10 +53,10 @@ async function testConnection() {
     testResult.value = null;
 
     try {
-        const res = await serverApi.test({
-            url: settings.serverUrl,
-            key: settings.serverKey,
-        });
+        const res = await serverApi.test(
+            settings.value.serverUrl,
+            settings.value.serverKey
+        );
 
         testResult.value = res;
 
