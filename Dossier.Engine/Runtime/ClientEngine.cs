@@ -1,11 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dossier.Engine.Queues;
-using Dossier.Engine.Workers.Base;
 using Dossier.Engine.Services;
-using Dossier.Engine.Workers.Implementations;
-using Dossier.Engine.Jobs;
-using Dossier.Engine.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Dossier.Engine.Runtime
 {
@@ -13,108 +10,169 @@ namespace Dossier.Engine.Runtime
     {
         private readonly SettingsService _settingsService;
         private readonly DatabaseService _dbService;
-        private readonly HttpClient _httpClient;
-        private readonly ILogger<UploadWorker> _logger;
+        private readonly FingerprintService _fingerprintService;
+        private readonly UploadService _uploadService;
+        private readonly ILogger<ClientEngine> _logger;
+        private readonly ILogger<FileWatcherService> _watcherLogger;
 
-        private readonly List<WorkerBase> _workers = new();
-        private readonly JobQueue _jobQueue;
         private FileWatcherService? _watcherService;
 
         public bool IsRunning { get; private set; }
 
-        public ClientEngine(SettingsService settingsService, DatabaseService dbService, HttpClient httpClient, ILogger<UploadWorker> logger)
+        public ClientEngine(
+            SettingsService settingsService,
+            DatabaseService dbService,
+            FingerprintService fingerprintService,
+            UploadService uploadService,
+            ILogger<ClientEngine> logger,
+            ILoggerFactory loggerFactory)
         {
             _settingsService = settingsService;
             _dbService = dbService;
-            _httpClient = httpClient;
+            _fingerprintService = fingerprintService;
+            _uploadService = uploadService;
             _logger = logger;
-            _jobQueue = new JobQueue();
+
+            _watcherLogger = loggerFactory.CreateLogger<FileWatcherService>();
         }
 
-        /// Starts the client runtime.
         public void Start()
         {
-            var settings = _settingsService.Get();
-
             if (IsRunning)
                 return;
 
+            var settings = _settingsService.Get();
+
+            if (string.IsNullOrEmpty(settings.WatchFolder))
+            {
+                throw new Exception(
+                    "WatchFolder is not configured"
+                );
+            }
+
             IsRunning = true;
 
-            InitializeWorkers();
+            _logger.LogInformation(
+                "Starting Dossier engine"
+            );
 
-            StartWorkers();
-
-            if (!string.IsNullOrEmpty(settings.WatchFolder))
-            {
-                StartWatching(settings.WatchFolder);
-            }
+            StartWatching(
+                settings.WatchFolder
+            );
         }
 
-        /// Stops all workers and shuts down the system.
         public async Task StopAsync()
         {
             if (!IsRunning)
                 return;
 
-            var stopTasks = new List<Task>();
+            _logger.LogInformation(
+                "Stopping Dossier engine"
+            );
 
-            foreach (var worker in _workers)
-            {
-                stopTasks.Add(worker.StopAsync());
-            }
-
-            await Task.WhenAll(stopTasks);
+            _watcherService?.Dispose();
 
             IsRunning = false;
+
+            await Task.CompletedTask;
         }
 
-        /// Creates all worker instances.
-        private void InitializeWorkers()
+        private void StartWatching(string folder)
         {
-            _workers.Clear();
+            var existingPaths = _dbService.GetAllVideoPaths();
 
-            _workers.Add(new FingerprintWorker(_jobQueue, _dbService));
-            _workers.Add(new PreprocessingWorker(_jobQueue, _settingsService));
-            _workers.Add(new UploadWorker(_jobQueue, _settingsService, _httpClient, _logger));
+            _watcherService =
+                new FileWatcherService(
+
+                    path =>
+                    {
+                        _ = ProcessFileAsync(path);
+                    },
+
+                    path =>
+                    {
+                        _dbService.RemoveFingerprint(path);
+
+
+                        _logger.LogInformation(
+                            "Removed deleted file: {Path}",
+                            path
+                        );
+                    },
+
+                    _watcherLogger
+
+                );
+
+            _watcherService.Start(
+                folder,
+                existingPaths
+            );
+
+            _logger.LogInformation(
+                "Watching folder: {Folder}",
+                folder
+            );
         }
-        
-        /// <summary>
-        /// Starts all workers.
-        /// </summary>
-        private void StartWorkers()
+
+        private async Task ProcessFileAsync(string path)
         {
-            foreach (var worker in _workers)
+            try
             {
-                worker.Start();
+                _logger.LogInformation(
+                    "Detected video: {Path}",
+                    path
+                );
+
+                if (_dbService.Exists(path))
+                {
+                    _logger.LogDebug(
+                        "Already indexed: {Path}",
+                        path
+                    );
+
+                    return;
+                }
+
+                _logger.LogInformation(
+                    "Generating fingerprint: {Path}",
+                    path
+                );
+
+                var fingerprint =
+                    _fingerprintService.Generate(
+                        path
+                    );
+
+                _dbService.RegisterFingerprint(
+                    path,
+                    fingerprint
+                );
+
+                _logger.LogInformation(
+                    "Fingerprint created: {Fingerprint}",
+                    fingerprint
+                );
+
+                await _uploadService.UploadAsync(
+                    path,
+                    fingerprint
+                );
+
+                _logger.LogInformation(
+                    "Upload completed: {Path}",
+                    path
+                );
+                
             }
-        }
-
-        /// <summary>
-        /// Expose queue for other systems (like FileWatcher later)
-        /// </summary>
-        public JobQueue GetJobQueue()
-        {
-            return _jobQueue;
-        }
-
-        public void StartWatching(string folder)
-        {   
-            var existingPaths = new List<string>();
-            _dbService.GetAllFingerprintPaths(existingPaths);
-
-            _watcherService = new FileWatcherService(path => 
+            catch(Exception ex)
             {
-                var job = new ProcessingJob { FilePath = path, State = JobState.Created };
-                _jobQueue.Enqueue(job);
-            },
-
-            path =>
-            {
-               _dbService.RemoveFingerprint(path); 
-            });
-
-            _watcherService.Start(folder, existingPaths);
+                _logger.LogError(
+                    ex,
+                    "Failed processing file: {Path}",
+                    path
+                );
+            }
         }
     }
 }

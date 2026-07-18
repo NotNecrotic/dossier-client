@@ -1,4 +1,6 @@
 using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Dossier.Engine.Services
@@ -9,67 +11,234 @@ namespace Dossier.Engine.Services
 
         public DatabaseService()
         {
-            var dbDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Dossier");
+            var dbDir =
+                Path.Combine(
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.LocalApplicationData
+                    ),
+                    "Dossier"
+                );
+
             Directory.CreateDirectory(dbDir);
-            _connectionString = $"Data Source={Path.Combine(dbDir, "dossier.db")}";
+
+            var dbPath =
+                Path.Combine(
+                    dbDir,
+                    "dossier.db"
+                );
+
+            _connectionString =
+                $"Data Source={dbPath}";
 
             InitializeDatabase();
         }
 
         private void InitializeDatabase()
         {
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            var command =
+                connection.CreateCommand();
+
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Videos
+                (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                    FilePath TEXT NOT NULL UNIQUE,
+
+                    Fingerprint TEXT NOT NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS IX_Videos_Fingerprint
+                ON Videos(Fingerprint);
+            ";
+
+            command.ExecuteNonQuery();
+        }
+
+        public void RegisterFingerprint(
+            string filePath,
+            string fingerprint)
+        {
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText = @"
+                INSERT INTO Videos
+                (
+                    FilePath,
+                    Fingerprint
+                )
+
+                VALUES
+                (
+                    $path,
+                    $fingerprint
+                )
+
+                ON CONFLICT(FilePath)
+                DO UPDATE SET
+                    Fingerprint = excluded.Fingerprint;
+            ";
+
+            command.Parameters.AddWithValue(
+                "$path",
+                filePath
+            );
+
+            command.Parameters.AddWithValue(
+                "$fingerprint",
+                fingerprint
+            );
+
+            command.ExecuteNonQuery();
+        }
+
+        public void RemoveFingerprint(
+            string filePath)
+        {
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                @"
+                DELETE FROM Videos
+                WHERE FilePath = $path;
+                ";
+
+            command.Parameters.AddWithValue(
+                "$path",
+                filePath
+            );
+
+            command.ExecuteNonQuery();
+        }
+
+        public List<string> GetAllVideoPaths()
+        {
+            var paths =
+                new List<string>();
+
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                "SELECT FilePath FROM Videos;";
+
+            using var reader =
+                command.ExecuteReader();
+
+            while(reader.Read())
+            {
+                paths.Add(
+                    reader.GetString(0)
+                );
+            }
+
+            return paths;
+        }
+
+        public string? GetFingerprint(
+            string filePath)
+        {
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                @"
+                SELECT Fingerprint
+                FROM Videos
+                WHERE FilePath = $path;
+                ";
+
+            command.Parameters.AddWithValue(
+                "$path",
+                filePath
+            );
+
+            var result =
+                command.ExecuteScalar();
+
+            return result?.ToString();
+        }
+
+        public bool ContainsFingerprint(
+            string fingerprint)
+        {
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                @"
+                SELECT EXISTS
+                (
+                    SELECT 1
+                    FROM Videos
+                    WHERE Fingerprint = $fingerprint
+                );
+                ";
+
+            command.Parameters.AddWithValue(
+                "$fingerprint",
+                fingerprint
+            );
+
+            return Convert.ToInt32(
+                command.ExecuteScalar()
+            ) == 1;
+        }
+
+        public bool Exists(string filePath)
+        {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
-            
-            var script = @"
-                CREATE TABLE IF NOT EXISTS Fingerprints (
-                    FilePath TEXT PRIMARY KEY,
-                    Fingerprint TEXT
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                SELECT EXISTS(
+                    SELECT 1 
+                    FROM Videos 
+                    WHERE FilePath = $filePath
                 );";
 
-            using var command = connection.CreateCommand();
-            command.CommandText = script;
-            command.ExecuteNonQuery();
-        }
+            command.Parameters.AddWithValue(
+                "$filePath",
+                filePath
+            );
 
-        public void RegisterFingerprint(string filePath, string fingerprint)
-        {
-            using var connection = new SqliteConnection(_connectionString);
-            connection.Open();
+            var result = command.ExecuteScalar();
 
-            using var command = connection.CreateCommand();
-            command.CommandText = @"
-                INSERT OR REPLACE INTO Fingerprints (FilePath, Fingerprint)
-                VALUES ($filePath, $fingerprint);";
-            command.Parameters.AddWithValue("$filePath", filePath);
-            command.Parameters.AddWithValue("$fingerprint", fingerprint);
-
-            command.ExecuteNonQuery();
-        }
-
-        public void RemoveFingerprint(string filePath)
-        {
-            using var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Fingerprints WHERE FilePath = $path";
-            cmd.Parameters.AddWithValue("$path", filePath);
-            cmd.ExecuteNonQuery();
-        }
-
-       public void GetAllFingerprintPaths(List<string> paths)
-        {
-            using var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-
-            var command = connection.CreateCommand();
-            command.CommandText = "SELECT FilePath FROM Fingerprints";
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                paths.Add(reader.GetString(0));
-            }
+            return Convert.ToInt32(result) == 1;
         }
     }
 }

@@ -5,12 +5,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 
-
 builder.Services.AddSingleton<ClientStateService>();
 builder.Services.AddSingleton<ExplorerService>();
+
 builder.Services.AddSingleton<SettingsService>();
+
 builder.Services.AddSingleton<DatabaseService>();
+builder.Services.AddSingleton<FingerprintService>();
+builder.Services.AddSingleton<UploadService>();
+
 builder.Services.AddSingleton<ClientEngine>();
+
 
 builder.Services.AddHostedService<EngineBackgroundService>();
 
