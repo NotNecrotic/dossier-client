@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dossier.Engine.Queues;
-using Dossier.Engine.Workers.Base;
-using Dossier.Engine.Services;
-using Dossier.Engine.Workers.Implementations;
-using Dossier.Engine.Jobs;
-using Dossier.Engine.Enums;
+using Dossier.Client.Queues;
+using Dossier.Client.Workers.Base;
+using Dossier.Client.Services;
+using Dossier.Client.Workers.Implementations;
+using Dossier.Client.Jobs;
+using Dossier.Client.Enums;
 
-namespace Dossier.Engine.Runtime
+namespace Dossier.Client.Runtime
 {
     public class ClientEngine
     {

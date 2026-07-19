@@ -1,11 +1,11 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Dossier.Engine.Services;
-using Dossier.Engine.Models;
+using Dossier.Client.Services;
+using Dossier.Client.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Dossier.Engine.Services
+namespace Dossier.Client.Services
 {
     public class UploadService
     {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Dossier.Engine.Services
+namespace Dossier.Client.Services
 {
     public class FileWatcherService : IDisposable
     {

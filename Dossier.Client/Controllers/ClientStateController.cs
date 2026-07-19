@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Dossier.Engine.Models;
-using Dossier.Engine.Services;
+using Dossier.Client.Models;
+using Dossier.Client.Services;
 
-namespace Dossier.Engine.Controllers;
+namespace Dossier.Client.Controllers;
 
 [ApiController]
 [Route("api/state")]

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Dossier.Engine.Services
+namespace Dossier.Client.Services
 {
     public class DatabaseService
     {

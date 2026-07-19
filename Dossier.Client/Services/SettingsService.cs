@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Dossier.Engine.Models;
+using Dossier.Client.Models;
 
-namespace Dossier.Engine.Services;
+namespace Dossier.Client.Services;
 
 public class SettingsService
 {

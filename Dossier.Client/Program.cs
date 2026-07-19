@@ -1,5 +1,5 @@
-using Dossier.Engine.Services;
-using Dossier.Engine.Runtime;
+using Dossier.Client.Services;
+using Dossier.Client.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 

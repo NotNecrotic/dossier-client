@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dossier.Engine.Services;
+using Dossier.Client.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Dossier.Engine.Runtime
+namespace Dossier.Client.Runtime
 {
     public class ClientEngine
     {

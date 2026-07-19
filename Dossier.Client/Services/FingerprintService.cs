@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace Dossier.Engine.Services
+namespace Dossier.Client.Services
 {
     public class FingerprintService
     {

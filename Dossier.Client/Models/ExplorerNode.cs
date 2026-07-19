@@ -1,4 +1,4 @@
-namespace Dossier.Engine.Models;
+namespace Dossier.Client.Models;
 
 public class ExplorerNode
 {
