@@ -6,16 +6,7 @@
     --text-muted: #c5a1b5;
 
     /* NEW */
-    --primary-50:  #f8f5ff;
-    --primary-100: #f0e8ff;
-    --primary-200: #e2d2ff;
-    --primary-300: #cfb1ff;
-    --primary-400: #b88aff;
-    --primary-500: #a855f7;
-    --primary-600: #9333ea;
-    --primary-700: #7e22ce;
-    --primary-800: #6b21a8;
-    --primary-900: #581c87;
+    
 
     --surface-0: #09070d;   /* Application background */
     --surface-1: #100d17;   /* Sidebar */
@@ -23,19 +14,21 @@
     --surface-3: #1e1828;   /* Cards */
     --surface-4: #2a2237;   /* Elevated cards */
 
-    --border-subtle: rgba(255,255,255,.04);
-    --border-default: rgba(255,255,255,.08);
-    --border-strong: rgba(255,255,255,.15);
 
     --text-primary:   #f5f5f7;
     --text-secondary: #b7b7c8;
     --text-muted:     #8b8ba0;
     --text-disabled:  #66667a;
 
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger:  #ef4444;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger:  #EF4444;
     --info:    var(--brand-500);
+
+    --status-processing: #F59E0B;
+    --status-completed: #10B981;
+    --status-error: #EF4444;
+    --status-unprocessed: #52525B;
 
     --glow-primary: rgba(168,85,247,.12);
     --glow-soft: rgba(255,255,255,.03);
@@ -48,7 +41,7 @@
     --blur-background: 80px;
 }
 
-body {
+/* body {
     margin: 0;
     min-height: 100vh;
     overflow: hidden;
@@ -107,7 +100,7 @@ body::after {
             rgba(255,255,255,.12) 3px);
 
     background-size: 120px 120px;
-}
+} */
 
 @keyframes backgroundFloat {
 
@@ -236,7 +229,7 @@ body::after {
 
     outline: none;
 
-    border-color: var(--primary-500);
+    border-color: var(--accent-500);
 }
 
 .onboarding-card select option {
@@ -290,7 +283,7 @@ body::after {
 }   
 
 .onboarding-card .browse-folder-button:hover {
-    color: var(--primary-500);
+    color: var(--accent-500);
 }
 
 .onboarding-card .browse-folder-button svg {
@@ -322,8 +315,8 @@ body::after {
 
     background: linear-gradient(
         135deg,
-        var(--primary-500),
-        var(--primary-600)
+        var(--accent-500),
+        var(--accent-600)
     );
 
     color: white;
@@ -382,7 +375,7 @@ body::after {
     width: 25%;
     height: 100%;
 
-    background: var(--primary-500);
+    background: var(--accent-500);
 
     transition: width .4s ease;
 }
@@ -520,7 +513,7 @@ body::after {
 .brand-title {
     font-size: 2.8rem;
     font-weight: 800;
-    letter-spacing: -0.5px;
+
     background: linear-gradient(135deg, #ffffff 40%, var(--accent-pink) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -690,12 +683,6 @@ body::after {
             --accent-pink-dim: rgba(192, 132, 252, 0.15);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
 
        
 
@@ -720,7 +707,7 @@ body::after {
         .hero-section h1 {
             font-size: 2.8rem;
             font-weight: 700;
-            letter-spacing: -0.5px;
+         
             margin-bottom: 12px;
             background: linear-gradient(135deg, #fff 40%, var(--accent-pink) 100%);
             -webkit-background-clip: text;
@@ -857,7 +844,7 @@ body::after {
             border-bottom: 1px solid var(--panel-border);
             font-size: 0.85rem;
             font-weight: 700;
-            letter-spacing: 0.8px;
+        
             display: flex;
             align-items: center;
             justify-content: space-between;

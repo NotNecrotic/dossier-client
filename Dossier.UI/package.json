@@ -1,16 +1,30 @@
 {
-  "name": "dossier.ui",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "name": "dossier-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "electron": "electron electron/main.js",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "electron": "^43.0.0"
+    "@lucide/vue": "^1.24.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "pinia": "^3.0.4",
+    "tailwindcss": "^4.3.2",
+    "vue": "^3.5.39",
+    "vue-sonner": "^2.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/tsconfig": "^0.9.1",
+    "electron": "^43.1.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "vite-svg-loader": "^5.1.1",
+    "vue-tsc": "^3.3.5"
   }
 }
