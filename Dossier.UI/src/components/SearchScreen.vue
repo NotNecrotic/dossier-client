@@ -118,7 +118,7 @@ function handleKeydown(event: KeyboardEvent)
                 <h1 class="text-4xl sm:text-5xl font-bold tracking-[0.02em] translate-y-1">OSSIER</h1>
             </div>
 
-            <div class="mt-12 w-full overflow-hidden relative p-[2px] rounded-full">
+            <div class="mt-12 w-full overflow-hidden relative p-[2px] rounded-full z-0">
                 <div class="search-border-glow-layer"></div>
                 <div class="flex items-center gap-2 rounded-full bg-[var(--panel)] border-2 border-[var(--border-strong)] py-2 pl-5 pr-2" @submit.prevent="submitSearch">
                     <sparkles class="h-4 w-4 opacity-70 text-[var(--accent-500)]"></sparkles>
