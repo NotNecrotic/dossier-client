@@ -1,46 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
+@theme {
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
+  --color-accent-800: var(--accent-800);
+  --color-accent-900: var(--accent-900);
+
+  --color-accent-glow: var(--accent-glow);
+
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --font-heading: "Chivo", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
 :root {
-    --accent-50:  #f5f9ff;
-    --accent-100: #dbeafe;
-    --accent-200: #bfdbfe;
-    --accent-300: #93c5fd;
-    --accent-400: #60a5fa;
-    --accent-500: #3b82f6;
-    --accent-600: #2563eb;
-    --accent-700: #1d4ed8;
-    --accent-800: #1e40af;
-    --accent-900: #1e3a8a;
+  --accent-50: #f5f9ff;
+  --accent-100: #dbeafe;
+  --accent-200: #bfdbfe;
+  --accent-300: #93c5fd;
+  --accent-400: #60a5fa;
+  --accent-500: #3b82f6;
+  --accent-600: #2563eb;
+  --accent-700: #1d4ed8;
+  --accent-800: #1e40af;
+  --accent-900: #1e3a8a;
 
-    --accent-glow: rgba(59, 130, 246, 0.15);
+  --accent-glow: rgba(59, 130, 246, 0.15);
 
-    --font-heading: "Chivo",system-ui,sans-serif;
-    --font-body: "IBM Plex Sans",system-ui,sans-serif;
+  --radius: 0.5rem;
 }
 
 .theme-dark {
-    --bg: #09090B;
-    --panel: #141417;
-    --surface: #1E1E22;
-    --surface-hover: #27272A;
-    --border: #27272A;
-    --border-strong: #3F3F46;
-    --text: #FAFAFA;
-    --text-secondary: #A1A1AA;
-    --text-muted: #71717A;
-    --overlay: rgba(0, 0, 0, 0.55);
+  --bg: #09090b;
+  --panel: #141417;
+  --surface: #1e1e22;
+  --surface-hover: #27272a;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --text: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --overlay: rgba(0, 0, 0, 0.55);
 }
 
 .theme-light {
-    --bg: #FAFAFA;
-    --panel: #F4F4F5;
-    --surface: #FFFFFF;
-    --surface-hover: #F4F4F5;
-    --border: #E4E4E7;
-    --border-strong: #D4D4D8;
-    --text: #09090B;
-    --text-secondary: #52525B;
-    --text-muted: #71717A;
-    --overlay: rgba(15, 15, 20, 0.35);
+  --bg: #fafafa;
+  --panel: #f4f4f5;
+  --surface: #ffffff;
+  --surface-hover: #f4f4f5;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --text: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --overlay: rgba(15, 15, 20, 0.35);
 }
