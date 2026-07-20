@@ -147,7 +147,7 @@ namespace Dossier.Client.Services
             using var reader =
                 command.ExecuteReader();
 
-            while(reader.Read())
+            while (reader.Read())
             {
                 paths.Add(
                     reader.GetString(0)
@@ -184,6 +184,63 @@ namespace Dossier.Client.Services
                 command.ExecuteScalar();
 
             return result?.ToString();
+        }
+
+        public Dictionary<string, string?> GetFingerprints(
+            List<string> filePaths)
+        {
+            var result = new Dictionary<string, string?>();
+
+            if (filePaths.Count == 0)
+                return result;
+
+
+            using var connection =
+                new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+
+            using var command =
+                connection.CreateCommand();
+
+
+            var parameters = new List<string>();
+
+
+            for (int i = 0; i < filePaths.Count; i++)
+            {
+                var parameter = $"$path{i}";
+
+                parameters.Add(parameter);
+
+                command.Parameters.AddWithValue(
+                    parameter,
+                    filePaths[i]
+                );
+            }
+
+
+            command.CommandText = $@"
+                SELECT FilePath, Fingerprint
+                FROM Videos
+                WHERE FilePath IN ({string.Join(",", parameters)});
+            ";
+
+
+            using var reader =
+                command.ExecuteReader();
+
+
+            while (reader.Read())
+            {
+                result[
+                    reader.GetString(0)
+                ] =
+                    reader.GetString(1);
+            }
+
+            return result;
         }
 
         public bool ContainsFingerprint(

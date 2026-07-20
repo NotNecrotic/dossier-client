@@ -21,9 +21,11 @@ public class ExplorerController : ControllerBase
 
 
     [HttpGet("tree")]
-    public ActionResult<List<ExplorerNode>> GetTree()
+    public async Task<ActionResult<List<ExplorerNode>>> GetTree()
     {
-        return Ok(_explorer.GetTree());
+        var tree = await _explorer.GetTree();
+
+        return Ok(tree);
     }
 
 }
