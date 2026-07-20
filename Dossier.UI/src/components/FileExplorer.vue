@@ -12,6 +12,7 @@ import {
   CircleAlert,
   CircleHelp,
   FileVideo,
+  RefreshCw,
 } from "@lucide/vue";
 import { getExplorerTree, type ExplorerNode } from "../api/explorer";
 
@@ -20,6 +21,7 @@ type NodeStatus = "indexed" | "processing" | "unindexed" | "unknown";
 const nodes = ref<ExplorerNode[]>([]);
 
 const isLoading = ref(true);
+const isRefreshing = ref(false);
 
 const emit = defineEmits<{
   (e: "select-video", video: ExplorerNode): void;
@@ -172,6 +174,8 @@ function statusSymbol(status?: NodeStatus) {
 
 async function loadTree() {
   try {
+    isRefreshing.value = true;
+
     nodes.value = await getExplorerTree();
 
     const root = nodes.value.find((node) => node.parentId === null);
@@ -181,6 +185,7 @@ async function loadTree() {
     }
   } finally {
     isLoading.value = false;
+    isRefreshing.value = false;
   }
 }
 
@@ -202,13 +207,29 @@ loadTree();
         >
       </div>
 
-      <button
-        type="button"
-        title="Collapse"
-        class="rounded-[3px] p-1 text-[var(--text-muted)] hover:bg-[var(--accent-500)] hover:text-[var(--text)]"
-      >
-        <chevrons-left class="h-4 w-4"></chevrons-left>
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          title="Refresh"
+          @click="loadTree"
+          class="rounded-[3px] p-1 text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
+        >
+          <RefreshCw
+            class="h-4 w-4"
+            :class="{
+              'animate-spin': isRefreshing,
+            }"
+          />
+        </button>
+
+        <button
+          type="button"
+          title="Collapse"
+          class="rounded-[3px] p-1 text-[var(--text-muted)] hover:bg-[var(--accent-500)] hover:text-[var(--text)]"
+        >
+          <ChevronsLeft class="h-4 w-4" />
+        </button>
+      </div>
     </div>
 
     <div class="border-b border-[var(--border-strong)] p-2">
