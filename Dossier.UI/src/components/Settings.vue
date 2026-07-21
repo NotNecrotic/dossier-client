@@ -161,24 +161,20 @@ async function installUpdate() {
 </script>
 
 <template>
-  <div v-if="!settings" class="p-8 text-[var(--text-secondary]">
-    Loading settings…
-  </div>
+  <div v-if="!settings" class="p-8 text-text-secondary">Loading settings…</div>
 
   <div v-else class="mx-auto max-w-4xl px-8 py-12">
     <button
       @click="setView('search')"
-      class="mb-6 flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)]"
+      class="mb-6 flex items-center gap-2 text-sm text-text-secondary hover:text-text"
     >
       <ArrowLeft class="h-4 w-4" />
       Back
     </button>
 
     <div class="mb-10">
-      <h1 class="text-4xl font-bold tracking-tight text-[var(--text)]">
-        Settings
-      </h1>
-      <p class="mt-2 text-sm text-[var(--text-secondary)]">
+      <h1 class="text-4xl font-bold tracking-tight text-text">Settings</h1>
+      <p class="mt-2 text-sm text-text-secondary">
         Configure how Dossier connects to your processing server and indexes
         your library.
       </p>
@@ -239,10 +235,10 @@ async function installUpdate() {
               type="button"
               :disabled="testing || !settings.serverUrl"
               @click="testConnection"
-              class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)] disabled:text-[var(--text-muted)]"
+              class="flex items-center gap-1.5 rounded-full border border-border-strong px-4 py-1.5 text-xs hover:bg-surface disabled:text-text-muted"
             >
               <Loader2 v-if="testing" class="h-3.5 w-3.5 animate-spin" />
-              <Zap v-else class="h-3.5 w-3.5 text-[var(--accent-500)]" />
+              <Zap v-else class="h-3.5 w-3.5 text-accent-500" />
               Test connection
             </button>
           </div>
@@ -266,7 +262,7 @@ async function installUpdate() {
               @commit="set({ watchFolder: $event })"
             />
             <button
-              class="flex items-center justify-center h-10 w-10 gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text)]"
+              class="flex items-center justify-center h-10 w-10 gap-2 rounded-full border border-border-strong bg-surface text-text-secondary hover:text-text"
               @click="selectVideoFolder"
             >
               <folder class="h-4 w-4"></folder>
@@ -305,15 +301,15 @@ async function installUpdate() {
           description="Dark by default. Choose whichever is easier on your eyes."
         >
           <div
-            class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] p-1"
+            class="flex items-center gap-1.5 rounded-full border border-border-strong bg-surface p-1"
           >
             <button
               @click="set({ theme: 'dark' })"
               class="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
               :class="
                 settings.theme === 'dark'
-                  ? 'bg-[var(--surface)] text-[var(--accent-500)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
+                  ? 'bg-surface text-accent-500'
+                  : 'text-text-secondary hover:text-text'
               "
             >
               <Moon class="h-3.5 w-3.5" />
@@ -325,8 +321,8 @@ async function installUpdate() {
               class="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
               :class="
                 settings.theme === 'light'
-                  ? 'bg-[var(--surface)] text-[var(--accent-500)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
+                  ? 'bg-surface text-accent-500'
+                  : 'text-text-secondary hover:text-text'
               "
             >
               <Sun class="h-3.5 w-3.5" />
@@ -347,8 +343,8 @@ async function installUpdate() {
               class="relative flex h-7 w-7 items-center justify-center rounded-full border"
               :class="
                 settings.accent === a.name
-                  ? 'border-[var(--border-strong)] scale-110'
-                  : 'border-[var(--border-strong)] hover:scale-110'
+                  ? 'border-border-strong scale-110'
+                  : 'border-border-strong hover:scale-110'
               "
               :style="{
                 backgroundColor: a.main,
@@ -407,14 +403,14 @@ async function installUpdate() {
               type="button"
               :disabled="checkingUpdates || installingUpdate"
               @click="checkForUpdates"
-              class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)] disabled:opacity-50"
+              class="flex items-center gap-1.5 rounded-full border border-border-strong px-4 py-1.5 text-xs hover:bg-surface disabled:opacity-50"
             >
               <Loader2
                 v-if="checkingUpdates"
                 class="h-3.5 w-3.5 animate-spin"
               />
 
-              <RefreshCw v-else class="h-3.5 w-3.5 text-[var(--accent-500)]" />
+              <RefreshCw v-else class="h-3.5 w-3.5 text-accent-500" />
 
               Check for updates
             </button>
@@ -424,7 +420,7 @@ async function installUpdate() {
               type="button"
               :disabled="installingUpdate"
               @click="installUpdate"
-              class="flex items-center gap-1.5 rounded-full bg-[var(--accent-500)] px-4 py-1.5 text-xs text-white hover:opacity-90 disabled:opacity-50"
+              class="flex items-center gap-1.5 rounded-full bg-accent-500 px-4 py-1.5 text-xs text-white hover:opacity-90 disabled:opacity-50"
             >
               <Loader2
                 v-if="installingUpdate"
@@ -436,10 +432,7 @@ async function installUpdate() {
               Install update
             </button>
 
-            <span
-              v-if="updateStatus"
-              class="text-xs text-[var(--text-secondary)]"
-            >
+            <span v-if="updateStatus" class="text-xs text-text-secondary">
               {{ updateStatus }}
             </span>
           </div>
