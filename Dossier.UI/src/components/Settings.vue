@@ -5,6 +5,13 @@ import { toast } from "vue-sonner";
 import { useSettings } from "../composables/useSettings";
 import { serverApi } from "../api/server";
 
+import {
+  checkForUpdates as apiCheckForUpdates,
+  installUpdate as apiInstallUpdate,
+} from "../api/update";
+
+import { getVersion } from "../api/info";
+
 import Section from "./settings/Section.vue";
 import Row from "./settings/Row.vue";
 import PillInput from "./settings/PillInput.vue";
@@ -27,6 +34,7 @@ import {
   Folder,
   ArrowLeft,
   RefreshCw,
+  Download,
 } from "@lucide/vue";
 
 const { setView } = defineProps({
@@ -39,7 +47,22 @@ const testing = ref(false);
 const testResult = ref(null);
 
 const checkingUpdates = ref(false);
+const installingUpdate = ref(false);
+
+const updateAvailable = ref(false);
+const updateVersion = ref("");
 const updateStatus = ref("");
+
+const version = ref("Loading...");
+
+onMounted(async () => {
+  try {
+    const info = await getVersion();
+    version.value = info.version;
+  } catch {
+    version.value = "Unknown";
+  }
+});
 
 async function set(patch) {
   settings.value = {
@@ -92,18 +115,47 @@ async function testConnection() {
 async function checkForUpdates() {
   checkingUpdates.value = true;
   updateStatus.value = "";
+  updateAvailable.value = false;
+  updateVersion.value = "";
 
   try {
-    // TODO: Call your backend or GitHub releases API.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    const update = await apiCheckForUpdates();
 
-    updateStatus.value = "You're running the latest version.";
-    toast.success("Dossier is up to date.");
-  } catch {
+    if (update.updateAvailable) {
+      updateAvailable.value = true;
+      updateVersion.value = update.latestVersion;
+      updateStatus.value = `Version ${update.latestVersion} is available.`;
+
+      toast.success("Update available.");
+    } else {
+      updateStatus.value = "You're running the latest version.";
+
+      toast.success("Dossier is up to date.");
+    }
+  } catch (error) {
+    console.error(error);
+
     updateStatus.value = "Unable to check for updates.";
+
     toast.error("Update check failed.");
   } finally {
     checkingUpdates.value = false;
+  }
+}
+
+async function installUpdate() {
+  installingUpdate.value = true;
+
+  try {
+    await apiInstallUpdate();
+
+    toast.success("Downloading update...");
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Failed to start update.");
+  } finally {
+    installingUpdate.value = false;
   }
 }
 </script>
@@ -342,26 +394,20 @@ async function checkForUpdates() {
         title="Client"
         description="Information about this Dossier desktop client."
       >
-        <Row
-          title="Platform"
-          description="Operating system running this client."
-        >
-          <span class="text-sm"> Windows 11 x64 </span>
-        </Row>
-
         <Row title="Version" description="Installed Dossier desktop version.">
-          <span class="text-sm"> v0.1.0-dev </span>
+          <span class="text-sm"> v{{ version }} </span>
         </Row>
 
         <Row
           title="Updates"
-          description="Check if a newer version of Dossier is available."
+          description="Check for and install new Dossier releases."
         >
           <div class="flex items-center gap-3">
             <button
               type="button"
-              class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)]"
+              :disabled="checkingUpdates || installingUpdate"
               @click="checkForUpdates"
+              class="flex items-center gap-1.5 rounded-full border border-[var(--border-strong)] px-4 py-1.5 text-xs hover:bg-[var(--surface)] disabled:opacity-50"
             >
               <Loader2
                 v-if="checkingUpdates"
@@ -371,6 +417,23 @@ async function checkForUpdates() {
               <RefreshCw v-else class="h-3.5 w-3.5 text-[var(--accent-500)]" />
 
               Check for updates
+            </button>
+
+            <button
+              v-if="updateAvailable"
+              type="button"
+              :disabled="installingUpdate"
+              @click="installUpdate"
+              class="flex items-center gap-1.5 rounded-full bg-[var(--accent-500)] px-4 py-1.5 text-xs text-white hover:opacity-90 disabled:opacity-50"
+            >
+              <Loader2
+                v-if="installingUpdate"
+                class="h-3.5 w-3.5 animate-spin"
+              />
+
+              <Download v-else class="h-3.5 w-3.5" />
+
+              Install update
             </button>
 
             <span

@@ -13,6 +13,7 @@ builder.Services.AddSingleton<SettingsService>();
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<FingerprintService>();
 builder.Services.AddSingleton<UploadService>();
+builder.Services.AddHttpClient<UpdateService>();
 
 builder.Services.AddSingleton<ClientEngine>();
 
