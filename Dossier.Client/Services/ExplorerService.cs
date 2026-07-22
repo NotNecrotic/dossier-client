@@ -145,7 +145,7 @@ public class ExplorerService
 
 
             var url =
-                $"{settings.ServerUrl}/videos/status";
+                $"{settings.ServerUrl}/api/videos/status";
 
 
             var response =
@@ -175,7 +175,6 @@ public class ExplorerService
                 SetUnknown(files);
                 return;
             }
-
 
             foreach (var file in files)
             {
