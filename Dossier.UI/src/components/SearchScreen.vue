@@ -11,6 +11,7 @@ const emit = defineEmits<{
 }>();
 
 const searchText = ref("");
+const searching = ref(false);
 
 const loading = ref(false);
 
@@ -28,61 +29,49 @@ function openSettings()
 }
 
 
-
 async function submitSearch()
 {
-    if (!searchText.value.trim())
-        return;
+    const question = searchText.value.trim();
 
+    if (!question)
+        return;
 
     loading.value = true;
 
-    statusMessage.value = 
-        "Parsing localized semantic embeddings...";
-
+    statusMessage.value =
+        "Searching your video library...";
 
     try
     {
         const response = await fetch(
-            "http://127.0.0.1:5187/api/chat",
+            "http://127.0.0.1:5187/api/query",
             {
                 method: "POST",
                 headers:
                 {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(
-                {
-                    message: searchText.value
+                body: JSON.stringify({
+                    question
                 })
             }
         );
 
-
         if (!response.ok)
-            throw new Error("Chat request failed");
-
+            throw new Error("Query request failed");
 
         const data = await response.json();
 
+        console.log("Query Response:", data);
 
-        console.log("AI Response:", data);
-
-
-        /*
-            Later:
-            - switch dashboard
-            - jump video
-            - load timeline
-        */
-
+        // data.answer
+        // data.references
 
         openDashboard();
 
         searchText.value = "";
-
     }
-    catch(error)
+    catch (error)
     {
         console.error(error);
 
@@ -123,7 +112,7 @@ function handleKeydown(event: KeyboardEvent)
                 <div class="flex items-center gap-2 rounded-full bg-[var(--panel)] border-2 border-[var(--border-strong)] py-2 pl-5 pr-2" @submit.prevent="submitSearch">
                     <sparkles class="h-4 w-4 opacity-70 text-[var(--accent-500)]"></sparkles>
                     <input v-model="searchText" id="searchInput" placeholder="Describe the scene, conversation, or moment..." class="w-full py-2 focus:outline-none text-sm sm:text-base" @keydown="handleKeydown"></input>
-                    <button type="button" id="searchSubmit" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-500)] text-black hover:opacity-90 disabled:opacity-80">
+                    <button type="button" id="searchSubmit" @click="submitSearch" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-500)] text-black hover:opacity-90 disabled:opacity-80">
                         <send class="h-4 w-4"></send>
                     </button>
                 </div>
