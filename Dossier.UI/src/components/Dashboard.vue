@@ -5,8 +5,12 @@
     <!-- FILE EXPLORER -->
     <FileExplorer @select-video="selectVideo" />
 
-    <!-- VIDEO PLAYER -->
-    <VideoPlayer ref="videoPlayer" :video="currentVideo" />
+    <!-- DOSSIER WORKSPACE -->
+    <Workspace
+      ref="workspaceRef"
+      :state="workspaceState"
+      :video="currentVideo"
+    />
 
     <!-- AI CHAT -->
     <ChatPanel
@@ -17,10 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import type { QueryKeypoint, QueryResponse } from "./workspace/WorkspaceState";
+import { WorkspaceState } from "./workspace/WorkspaceState";
 
 import FileExplorer from "./FileExplorer.vue";
-import VideoPlayer from "./VideoPlayer.vue";
+import Workspace from "./workspace/Workspace.vue";
 import ChatPanel from "./ChatPanel.vue";
 
 interface VideoItem {
@@ -31,21 +37,7 @@ interface VideoItem {
   status?: string;
 }
 
-interface QueryKeypoint {
-  fingerprint: string;
-  start: number;
-  end: number;
-  text: string;
-  reason: string;
-  filePath: string;
-}
-
-interface QueryResponse {
-  answer: string;
-  keypoints: QueryKeypoint[];
-}
-
-interface VideoPlayerExpose {
+interface WorkspaceExpose {
   jumpTo(seconds: number): void;
 }
 
@@ -55,7 +47,11 @@ const props = defineProps<{
 
 const currentVideo = ref<VideoItem | null>(null);
 
-const videoPlayer = ref<VideoPlayerExpose | null>(null);
+const workspaceState = computed(() =>
+  currentVideo.value ? WorkspaceState.VIDEO : WorkspaceState.WELCOME,
+);
+
+const workspaceRef = ref<WorkspaceExpose | null>(null);
 
 function selectVideo(video: VideoItem) {
   currentVideo.value = video;
@@ -71,18 +67,15 @@ function handleVideoRequest(point: QueryKeypoint) {
 
   const video: VideoItem = {
     id: point.fingerprint,
-
     name: point.filePath.split("\\").pop() ?? point.filePath,
-
     path: point.filePath,
-
     type: "file",
   };
 
   currentVideo.value = video;
 
   setTimeout(() => {
-    videoPlayer.value?.jumpTo(point.start);
+    workspaceRef.value?.jumpTo(point.start);
   }, 500);
 }
 </script>

@@ -1,31 +1,12 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from "vue";
 import { Sparkles, ChevronsRight, Send } from "@lucide/vue";
+import type { QueryKeypoint, QueryResponse } from "./workspace/WorkspaceState";
 
 interface ChatMessage {
   sender: "user" | "ai" | "system-alert";
 
   text: string;
-}
-
-interface QueryKeypoint {
-  fingerprint: string;
-
-  start: number;
-
-  end: number;
-
-  text: string;
-
-  reason: string;
-
-  filePath: string;
-}
-
-interface QueryResponse {
-  answer: string;
-
-  keypoints: QueryKeypoint[];
 }
 
 const props = defineProps<{
