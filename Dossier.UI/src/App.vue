@@ -1,23 +1,20 @@
 <script setup>
+import { ref, onMounted, watch } from "vue";
 
-import { ref, onMounted, watch } from "vue"
-
-import Onboarding from "./components/Onboarding.vue"
-import SearchScreen from "./components/SearchScreen.vue"
-import Dashboard from "./components/Dashboard.vue"
-import Settings from "./components/Settings.vue"
+import Onboarding from "./components/Onboarding.vue";
+import SearchScreen from "./components/SearchScreen.vue";
+import Dashboard from "./components/Dashboard.vue";
+import Settings from "./components/Settings.vue";
 import { useSettings } from "./composables/useSettings";
 import { getClientState, updateClientState } from "./services/clientStateApi";
 import { ACCENTS } from "./constants/accents";
 
-const loading = ref(true)
-const onboarding = ref(true)
-const currentScreen = ref("search")
+const loading = ref(true);
+const onboarding = ref(true);
+const currentScreen = ref("search");
+const searchResult = ref(null);
 
-const {
-  settings,
-  loadSettings
-} = useSettings();
+const { settings, loadSettings } = useSettings();
 
 async function checkState() {
   try {
@@ -26,25 +23,23 @@ async function checkState() {
     onboarding.value = state.onboarding;
   } catch (error) {
     console.error("Failed loading state", error);
-
-  }
-  finally {
+  } finally {
     loading.value = false;
   }
 }
 
 function setView(view) {
-  currentScreen.value = (view)
+  currentScreen.value = view;
 }
 
 async function finishOnboarding() {
   await updateClientState({
-    onboarding: false
+    onboarding: false,
   });
 
   onboarding.value = false;
 
-  setView('search')
+  setView("search");
 }
 
 watch(
@@ -52,18 +47,12 @@ watch(
   (theme) => {
     if (!theme) return;
 
-    document.documentElement.classList.remove(
-      "theme-dark",
-      "theme-light"
-    );
+    document.documentElement.classList.remove("theme-dark", "theme-light");
 
-    document.documentElement.classList.add(
-      `theme-${theme}`
-    );
+    document.documentElement.classList.add(`theme-${theme}`);
   },
-  { immediate: true }
+  { immediate: true },
 );
-
 
 watch(
   () => settings.value?.accent,
@@ -74,58 +63,64 @@ watch(
 
     if (!selected) return;
 
-    document.documentElement.style.setProperty(
-      "--accent-500",
-      selected.main
-    );
+    document.documentElement.style.setProperty("--accent-500", selected.main);
 
-    document.documentElement.style.setProperty(
-      "--accent-glow",
-      selected.glow
-    );
+    document.documentElement.style.setProperty("--accent-glow", selected.glow);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
-    [
-        () => settings.value?.theme,
-        () => settings.value?.accent
-    ],
-    ([theme, accent]) => {
-        if (!theme || !accent)
-            return;
+  [() => settings.value?.theme, () => settings.value?.accent],
+  ([theme, accent]) => {
+    if (!theme || !accent) return;
 
-        const image = `../src/assets/backgrounds/${theme}-${accent.toLowerCase()}.png`;
+    const image = `../src/assets/backgrounds/${theme}-${accent.toLowerCase()}.png`;
 
-        document.documentElement.style.setProperty(
-            "--background-image",
-            `url("${image}")`
-        );
-    },
-    {
-        immediate: true
-    }
+    document.documentElement.style.setProperty(
+      "--background-image",
+      `url("${image}")`,
+    );
+  },
+  {
+    immediate: true,
+  },
 );
 
 onMounted(async () => {
   await loadSettings();
   checkState();
 });
+
+function handleSearchResult(result) {
+  searchResult.value = result;
+
+  setView("dashboard");
+}
 </script>
 
 <template>
   <div v-if="loading">Loading Dossier...</div>
 
   <template v-else>
-
     <Onboarding v-if="onboarding" @complete="finishOnboarding" />
 
-    <SearchScreen v-if="currentScreen === 'search'" @dashboard="setView('dashboard')" @settings="setView('settings')" />
+    <SearchScreen
+      v-if="currentScreen === 'search'"
+      @dashboard="setView('dashboard')"
+      @settings="setView('settings')"
+      @search-result="handleSearchResult"
+    />
 
-    <Dashboard v-if="currentScreen === 'dashboard'" />
+    <Dashboard
+      v-if="currentScreen === 'dashboard'"
+      :search-result="searchResult"
+    />
 
-    <Settings v-if="currentScreen === 'settings'" :setView="setView" @close="setView('search')" />
-
+    <Settings
+      v-if="currentScreen === 'settings'"
+      :setView="setView"
+      @close="setView('search')"
+    />
   </template>
 </template>

@@ -274,6 +274,30 @@ namespace Dossier.Client.Services
             ) == 1;
         }
 
+        public string? GetPathByFingerprint(string fingerprint)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                SELECT FilePath
+                FROM Videos
+                WHERE Fingerprint = $fingerprint;
+            ";
+
+            command.Parameters.AddWithValue(
+                "$fingerprint",
+                fingerprint
+            );
+
+            var result = command.ExecuteScalar();
+
+            return result?.ToString();
+        }
+
         public bool Exists(string filePath)
         {
             using var connection = new SqliteConnection(_connectionString);

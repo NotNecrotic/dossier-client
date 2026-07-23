@@ -6,8 +6,13 @@ import Icon from "../assets/icon.svg";
 
 
 const emit = defineEmits<{
-    dashboard: [];
-    settings: [];
+    dashboard:[];
+
+    settings:[];
+
+    searchResult:[
+        result:any
+    ];
 }>();
 
 const searchText = ref("");
@@ -62,11 +67,17 @@ async function submitSearch()
 
         const data = await response.json();
 
+        
+
         console.log("Query Response:", data);
 
         // data.answer
         // data.references
-
+        emit(
+            "searchResult",
+            data
+        ) ;
+        
         openDashboard();
 
         searchText.value = "";
