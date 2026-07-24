@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full overflow-hidden bg-panel-dark">
+  <div class="h-full w-full overflow-hidden bg-bg">
     <WelcomeWorkspace v-if="state === WorkspaceState.WELCOME" />
 
     <VideoWorkspace

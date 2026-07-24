@@ -17,7 +17,6 @@
 
   --color-bg: var(--bg);
   --color-panel: var(--panel);
-  --color-panel-dark: var(--panel-dark);
   --color-surface-hover: var(--surface-hover);
 
   --color-border: var(--border);
@@ -56,7 +55,6 @@
 .theme-dark {
   --bg: #09090b;
   --panel: #141417;
-  --panel-dark: #0f0f11;
   --surface: #1e1e22;
   --surface-hover: #27272a;
   --border: #27272a;
@@ -70,7 +68,6 @@
 .theme-light {
   --bg: #fafafa;
   --panel: #f4f4f5;
-  --panel-dark: #c0c0c0;
   --surface: #ffffff;
   --surface-hover: #f4f4f5;
   --border: #e4e4e7;
