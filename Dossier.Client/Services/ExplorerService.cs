@@ -10,6 +10,7 @@ public class ExplorerService
     private readonly DatabaseService _databaseService;
     private readonly HttpClient _httpClient;
 
+    public bool ServerReachable { get; private set; }
 
     public ExplorerService(
         SettingsService settingsService,
@@ -24,6 +25,7 @@ public class ExplorerService
 
     public async Task<List<ExplorerNode>> GetTree()
     {
+
         var settings = _settingsService.Get();
 
         var root = settings.WatchFolder;
@@ -46,6 +48,7 @@ public class ExplorerService
             result
         );
 
+        await CheckServer();
 
         await UpdateStatuses(result);
 
@@ -119,6 +122,11 @@ public class ExplorerService
             .Where(x => x.Type == "file" && x.Path != null)
             .ToList();
 
+        if (ServerReachable != true)
+        {
+            SetUnknown(files);
+            return;
+        }
 
         var fingerprints =
             _databaseService.GetFingerprints(
@@ -206,14 +214,45 @@ public class ExplorerService
         }
     }
 
-
-
     private void SetUnknown(
         List<ExplorerNode> files)
     {
         foreach (var file in files)
         {
             file.Status = "unknown";
+        }
+    }
+
+    private async Task<bool> CheckServer()
+    {
+        try
+        {
+            var settings = _settingsService.Get();
+
+            var response =
+                await _httpClient.GetAsync(settings.ServerUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ServerReachable = false;
+                return false;
+            }
+
+            var data =
+                await response.Content
+                .ReadFromJsonAsync<Dictionary<string, string>>();
+
+            ServerReachable =
+                data != null &&
+                data.TryGetValue("status", out var status) &&
+                status == "online";
+
+            return ServerReachable;
+        }
+        catch
+        {
+            ServerReachable = false;
+            return false;
         }
     }
 }

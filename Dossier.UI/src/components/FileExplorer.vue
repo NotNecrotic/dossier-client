@@ -25,6 +25,7 @@ const isRefreshing = ref(false);
 
 const emit = defineEmits<{
   (e: "select-video", video: ExplorerNode): void;
+  (e: "loading-change", isLoading: boolean): void;
 }>();
 
 const expanded = ref(new Set(["f-root"]));
@@ -173,9 +174,11 @@ function statusSymbol(status?: NodeStatus) {
 }
 
 async function loadTree() {
-  try {
-    isRefreshing.value = true;
+  isLoading.value = true;
+  isRefreshing.value = true;
+  emit("loading-change", true);
 
+  try {
     nodes.value = await getExplorerTree();
 
     const root = nodes.value.find((node) => node.parentId === null);
@@ -186,6 +189,7 @@ async function loadTree() {
   } finally {
     isLoading.value = false;
     isRefreshing.value = false;
+    emit("loading-change", false);
   }
 }
 

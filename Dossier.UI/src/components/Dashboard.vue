@@ -3,13 +3,17 @@
     class="search grid grid-cols-[320px_minmax(0,1fr)_360px] h-screen w-screen"
   >
     <!-- FILE EXPLORER -->
-    <FileExplorer @select-video="selectVideo" />
+    <FileExplorer
+      @select-video="selectVideo"
+      @loading-change="(loading) => (isExplorerLoading = loading)"
+    />
 
     <!-- DOSSIER WORKSPACE -->
     <Workspace
       ref="workspaceRef"
       :state="workspaceState"
       :video="currentVideo"
+      :is-loading="isExplorerLoading"
     />
 
     <!-- AI CHAT -->
@@ -52,6 +56,8 @@ const workspaceState = computed(() =>
 );
 
 const workspaceRef = ref<WorkspaceExpose | null>(null);
+
+const isExplorerLoading = ref(true);
 
 function selectVideo(video: VideoItem) {
   currentVideo.value = video;

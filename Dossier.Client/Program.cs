@@ -27,6 +27,7 @@ builder.Services.AddCors(options =>
         policy
             .AllowAnyHeader()
             .AllowAnyMethod()
+            .WithExposedHeaders("X-Server-Reachable")
             .WithOrigins(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",

@@ -25,6 +25,8 @@ public class ExplorerController : ControllerBase
     {
         var tree = await _explorer.GetTree();
 
+        Response.Headers["X-Server-Reachable"] = _explorer.ServerReachable ? "true" : "false";
+
         return Ok(tree);
     }
 
